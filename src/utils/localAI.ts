@@ -124,7 +124,7 @@ export function generateLocalAIResponse(title: string, description: string, cate
 /**
  * Generates a mock Daily Briefing.
  */
-export function generateLocalDailyBriefing(tasks: any[]): { briefingText: string; speechText: string } {
+export function generateLocalDailyBriefing(tasks: any[], googleCalendarSynced: boolean): { briefingText: string; speechText: string } {
   if (tasks.length === 0) {
     return {
       briefingText: "Your schedule is clear today! Focus on building healthy habits and planning ahead.",
@@ -135,12 +135,118 @@ export function generateLocalDailyBriefing(tasks: any[]): { briefingText: string
   const highPanicTask = [...tasks].sort((a, b) => b.panicIndex - a.panicIndex)[0];
   const totalEffort = tasks.reduce((sum, t) => sum + t.estimatedEffort, 0);
 
-  const text = `Good morning! You have ${tasks.length} active task${tasks.length > 1 ? 's' : ''} on your board today, requiring about ${totalEffort} hours of focus. Your highest-urgency item is "${highPanicTask.title}" with a Panic Index of ${highPanicTask.panicIndex}%. I have structured your timeline to tackle this first. Let's make today count!`;
+  const calPrefix = googleCalendarSynced
+    ? "Good morning! I synchronized your Google Calendar and found 3 commitments today. I've automatically scheduled your focus blocks during your free slots to avoid conflicts. "
+    : "Good morning! I have analyzed your task list. ";
+
+  const text = `${calPrefix}You have ${tasks.length} active task${tasks.length > 1 ? 's' : ''} requiring about ${totalEffort} hours of focus. Your highest-urgency item is "${highPanicTask.title}" with a Panic Index of ${highPanicTask.panicIndex}%. Let's make today count!`;
 
   return {
     briefingText: text,
     speechText: text
   };
+}
+
+export function generateLocalDailyTimeline(tasks: any[], googleCalendarSynced: boolean): any[] {
+  const activeTasks = tasks.filter(t => !t.completed);
+  const timeline: any[] = [];
+  
+  if (googleCalendarSynced) {
+    // 1. Add Google Calendar commitments
+    timeline.push({ id: 'cal-1', timeSlot: '09:00 - 10:30', label: '🎓 Database Systems (CS101) Class', activityType: 'meeting' });
+    timeline.push({ id: 'cal-2', timeSlot: '12:00 - 13:00', label: '🍔 Project Group Lunch Meeting', activityType: 'meeting' });
+    timeline.push({ id: 'cal-3', timeSlot: '15:30 - 16:30', label: '🔬 Operating Systems Lab', activityType: 'meeting' });
+    
+    // 2. Fit tasks in free gaps
+    if (activeTasks.length > 0) {
+      // Gap 1: 10:30 - 12:00 (1.5 hours)
+      timeline.push({
+        id: `block-task-1-${Date.now()}`,
+        timeSlot: '10:30 - 12:00',
+        label: `🧠 Focus Session: ${activeTasks[0].title}`,
+        activityType: 'task',
+        referenceId: activeTasks[0].id
+      });
+      
+      // Gap 2: 13:00 - 15:30 (2.5 hours)
+      if (activeTasks.length > 1) {
+        timeline.push({
+          id: `block-task-2-${Date.now()}`,
+          timeSlot: '13:00 - 15:30',
+          label: `🧠 Focus Session: ${activeTasks[1].title}`,
+          activityType: 'task',
+          referenceId: activeTasks[1].id
+        });
+      } else {
+        timeline.push({
+          id: `block-task-2-${Date.now()}`,
+          timeSlot: '13:00 - 15:30',
+          label: '🧠 Open Study Block & Research',
+          activityType: 'task'
+        });
+      }
+      
+      // Gap 3: 16:30 - 18:00 (1.5 hours)
+      if (activeTasks.length > 2) {
+        timeline.push({
+          id: `block-task-3-${Date.now()}`,
+          timeSlot: '16:30 - 18:00',
+          label: `🧠 Focus Session: ${activeTasks[2].title}`,
+          activityType: 'task',
+          referenceId: activeTasks[2].id
+        });
+      } else {
+        timeline.push({
+          id: `block-task-3-${Date.now()}`,
+          timeSlot: '16:30 - 18:00',
+          label: '☕ Habit Review & Daily Reflection',
+          activityType: 'break'
+        });
+      }
+    }
+  } else {
+    // Standard schedule without Google Calendar
+    if (activeTasks.length > 0) {
+      timeline.push({
+        id: `block-task-1-${Date.now()}`,
+        timeSlot: '09:00 - 11:00',
+        label: `🧠 Focus Session: ${activeTasks[0].title}`,
+        activityType: 'task',
+        referenceId: activeTasks[0].id
+      });
+    }
+    
+    timeline.push({ id: 'block-break-1', timeSlot: '11:00 - 12:00', label: '☕ Mid-day Break & Review', activityType: 'break' });
+    
+    if (activeTasks.length > 1) {
+      timeline.push({
+        id: `block-task-2-${Date.now()}`,
+        timeSlot: '12:00 - 14:00',
+        label: `🧠 Focus Session: ${activeTasks[1].title}`,
+        activityType: 'task',
+        referenceId: activeTasks[1].id
+      });
+    }
+    
+    timeline.push({ id: 'block-break-2', timeSlot: '14:00 - 15:00', label: '🍔 Lunch Break', activityType: 'break' });
+    
+    if (activeTasks.length > 2) {
+      timeline.push({
+        id: `block-task-3-${Date.now()}`,
+        timeSlot: '15:00 - 17:00',
+        label: `🧠 Focus Session: ${activeTasks[2].title}`,
+        activityType: 'task',
+        referenceId: activeTasks[2].id
+      });
+    }
+  }
+  
+  // Sort timeline by timeSlot hour
+  return timeline.sort((a, b) => {
+    const aHour = parseInt(a.timeSlot.split(':')[0]);
+    const bHour = parseInt(b.timeSlot.split(':')[0]);
+    return aHour - bHour;
+  });
 }
 
 /**

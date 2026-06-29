@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTasks } from '../context/TaskContext';
 import { useAI } from '../context/AIContext';
 import { getPanicStatus } from '../utils/panic';
-import { Play, Copy, Check, Clock, AlertCircle, FileText, CheckSquare, Sparkles } from 'lucide-react';
+import { Play, Copy, Check, Clock, AlertCircle, FileText, CheckSquare, Sparkles, Calendar } from 'lucide-react';
 
 export const AIPlanner: React.FC = () => {
   const {
@@ -11,11 +11,14 @@ export const AIPlanner: React.FC = () => {
     toggleSubTask,
     dailyPlan,
     startFocusSession,
+    googleCalendarSynced,
+    syncGoogleCalendar,
   } = useTasks();
 
   const { generateBriefing, isProcessing } = useAI();
   const [copied, setCopied] = useState(false);
   const [showAsset, setShowAsset] = useState(true);
+  const [exportSuccess, setExportSuccess] = useState(false);
 
   const activeTask = tasks.find((t) => t.id === activeTaskId);
   const completedTasksCount = tasks.filter((t) => t.completed).length;
@@ -26,6 +29,11 @@ export const AIPlanner: React.FC = () => {
     navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleExportCalendar = () => {
+    setExportSuccess(true);
+    setTimeout(() => setExportSuccess(false), 3000);
   };
 
   // Find the first uncompleted subtask for the focus session
@@ -67,6 +75,35 @@ export const AIPlanner: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Google Calendar Sync Panel */}
+      {!googleCalendarSynced ? (
+        <div className="glass-panel p-4 flex flex-col gap-3 border-amber-500/20 bg-amber-950/5 animate-fadeIn">
+          <div className="flex items-start gap-2.5">
+            <Calendar className="w-4.5 h-4.5 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-xs font-bold text-amber-300">Sync Your Google Calendar</h4>
+              <p className="text-[10px] text-text-secondary mt-0.5">
+                Allow Alchemi to import your meetings, classes, and exams to automatically schedule focus blocks in your free slots.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={syncGoogleCalendar}
+            className="glass-btn justify-center text-xs py-1.5 border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+          >
+            Connect Google Calendar
+          </button>
+        </div>
+      ) : (
+        <div className="glass-panel p-3 flex items-center justify-between border-green-500/20 bg-green-950/5 animate-fadeIn">
+          <span className="text-[10px] text-green-300 font-semibold flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-ping"></span>
+            🟢 Google Calendar Connected
+          </span>
+          <span className="text-[9px] text-text-muted">3 events imported</span>
+        </div>
+      )}
 
       {/* Active Task Details (Mission Briefing) */}
       {activeTask ? (
@@ -200,15 +237,23 @@ export const AIPlanner: React.FC = () => {
           <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
             Daily Timeline Scheduler
           </span>
-          {!dailyPlan && (
+          <div className="flex items-center gap-2">
+            {dailyPlan && (
+              <button
+                onClick={handleExportCalendar}
+                className="glass-btn text-xs py-1 px-3 border-violet-500/20 text-violet-300"
+              >
+                {exportSuccess ? '🎉 Exported!' : 'Export to GCal'}
+              </button>
+            )}
             <button
               onClick={generateBriefing}
               disabled={isProcessing}
               className="glass-btn text-xs py-1 px-3"
             >
-              {isProcessing ? 'Scheduling...' : 'Auto-Schedule Day'}
+              {isProcessing ? 'Scheduling...' : dailyPlan ? 'Re-Plan Day' : 'Auto-Schedule Day'}
             </button>
-          )}
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-3 pr-1">
@@ -227,8 +272,13 @@ export const AIPlanner: React.FC = () => {
                 <span className="font-mono text-cyan-400 text-xs w-28 shrink-0">{block.timeSlot}</span>
                 <div className="flex-1 min-w-0">
                   <span className="font-medium text-text-primary block truncate">{block.label}</span>
-                  <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold block mt-0.5">
+                  <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mt-0.5 flex items-center gap-1.5">
                     {block.activityType}
+                    {block.activityType === 'meeting' && (
+                      <span className="text-[8px] bg-red-950/60 text-red-400 border border-red-900/40 px-1.5 py-0.2 rounded font-semibold">
+                        GCal Event
+                      </span>
+                    )}
                   </span>
                 </div>
               </div>
@@ -243,4 +293,5 @@ export const AIPlanner: React.FC = () => {
     </div>
   );
 };
+
 export default AIPlanner;

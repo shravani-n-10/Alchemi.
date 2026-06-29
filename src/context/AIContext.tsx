@@ -34,7 +34,7 @@ interface AIContextType {
 const AIContext = createContext<AIContextType | undefined>(undefined);
 
 export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { tasks, energyLevel, settings, setDailyPlan, dailyPlan, updateTask, updateSettings, habits, focusSessions } = useTasks();
+  const { tasks, energyLevel, settings, setDailyPlan, dailyPlan, updateTask, updateSettings, habits, focusSessions, googleCalendarSynced } = useTasks();
 
   const [chatHistory, setChatHistory] = useState<CoachMessage[]>([]);
   const [isListening, setIsListening] = useState(false);
@@ -270,9 +270,14 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       let speechText = '';
 
       if (useLocal) {
-        const res = localAI.generateLocalDailyBriefing(activeTasks);
+        const res = localAI.generateLocalDailyBriefing(activeTasks, googleCalendarSynced);
         briefingText = res.briefingText;
         speechText = res.speechText;
+
+        setDailyPlan({
+          date: new Date().toISOString().split('T')[0],
+          timeline: localAI.generateLocalDailyTimeline(activeTasks, googleCalendarSynced)
+        });
       } else {
         const commitments = dailyPlan ? dailyPlan.timeline.filter(t => t.activityType === 'meeting').map(t => t.label) : [];
         const res = await gemini.generateDailyTimeline(apiKey, activeTasks, commitments);

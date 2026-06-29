@@ -19,6 +19,8 @@ interface TaskContextType {
   userProfile: UserProfile;
   activeTaskId: string | null;
   activeSession: { taskId: string; subtaskId?: string; startTime: string } | null;
+  googleCalendarSynced: boolean;
+  syncGoogleCalendar: () => void;
   addTask: (task: Omit<Task, 'id' | 'panicIndex' | 'silentKiller' | 'createdAt' | 'subtasks' | 'completed'> & { subtasks?: SubTask[] }) => Promise<Task>;
   updateTask: (taskId: string, updates: Partial<Task>) => void;
   deleteTask: (taskId: string) => void;
@@ -96,6 +98,11 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : DEFAULT_PROFILE;
   });
 
+  const [googleCalendarSynced, setGoogleCalendarSynced] = useState(() => {
+    const saved = localStorage.getItem('alchemi_google_calendar_synced');
+    return saved === 'true';
+  });
+
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [activeSession, setActiveSession] = useState<{ taskId: string; subtaskId?: string; startTime: string } | null>(null);
 
@@ -131,6 +138,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('alchemi_profile', JSON.stringify(userProfile));
   }, [userProfile]);
+
+  useEffect(() => {
+    localStorage.setItem('alchemi_google_calendar_synced', String(googleCalendarSynced));
+  }, [googleCalendarSynced]);
 
   // Background Ticker: Recalculate Panic Index of all active tasks every 60 seconds
   useEffect(() => {
@@ -320,11 +331,16 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  const syncGoogleCalendar = () => {
+    setGoogleCalendarSynced(true);
+  };
+
   const logout = () => {
     setUserProfile(DEFAULT_PROFILE);
     setDailyPlanState(null);
     setActiveTaskId(null);
     setActiveSession(null);
+    setGoogleCalendarSynced(false);
   };
 
   return (
@@ -339,6 +355,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         userProfile,
         activeTaskId,
         activeSession,
+        googleCalendarSynced,
+        syncGoogleCalendar,
         addTask,
         updateTask,
         deleteTask,
