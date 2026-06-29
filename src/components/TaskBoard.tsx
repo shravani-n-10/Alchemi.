@@ -4,75 +4,24 @@ import { useAI } from '../context/AIContext';
 import { getPanicStatus } from '../utils/panic';
 import { Plus, Mic, CheckCircle, Flame, Clock, Zap } from 'lucide-react';
 
-export const TaskBoard: React.FC = () => {
+interface TaskBoardProps {
+  onCreateTask: () => void;
+}
+
+export const TaskBoard: React.FC<TaskBoardProps> = ({ onCreateTask }) => {
   const {
     tasks,
-    addTask,
     completeTask,
     energyLevel,
     setEnergyLevel,
     activeTaskId,
     setActiveTaskId,
-    updateTask,
   } = useTasks();
 
-  const { getTaskBreakdown, triggerVoiceAssistant, isListening } = useAI();
-
-  const [title, setTitle] = useState('');
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [desc, setDesc] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [effort, setEffort] = useState('1');
-  const [category, setCategory] = useState<'Work' | 'Study' | 'Personal' | 'Finance' | 'Urgent'>('Work');
-  const [isCreating, setIsCreating] = useState(false);
+  const { triggerVoiceAssistant, isListening } = useAI();
   const [selectedWhyTask, setSelectedWhyTask] = useState<any | null>(null);
 
   const activeTasks = tasks.filter((t) => !t.completed);
-
-  // Quick text task creation (standard enter key)
-  const handleQuickAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-
-    setIsCreating(true);
-    try {
-      // 1. Create task
-      const created = await addTask({
-        title: title.trim(),
-        description: desc.trim() || 'No description provided.',
-        dueDate: dueDate || new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
-        estimatedEffort: parseFloat(effort) || 1,
-        category,
-        energyLevel: 'medium',
-      });
-
-      setTitle('');
-      setDesc('');
-      setDueDate('');
-      setEffort('1');
-      setShowAddForm(false);
-
-      // 2. Generate subtasks and assets in background using Breakdown Agent
-      const breakdown = await getTaskBreakdown(created.title, created.description, created.category);
-      updateTask(created.id, {
-        subtasks: breakdown.subtasks.map((sub: any, idx: number) => ({
-          id: `sub-${idx}-${Date.now()}`,
-          title: sub.title,
-          duration: sub.duration,
-          completed: false,
-        })),
-        procrastinationWarning: breakdown.procrastinationWarning,
-        starterAsset: breakdown.starterAsset,
-      });
-
-      // Automatically select the newly created task
-      setActiveTaskId(created.id);
-    } catch (e) {
-      console.error('Failed to create task:', e);
-    } finally {
-      setIsCreating(false);
-    }
-  };
 
   // Human-readable countdown timer
   const getCountdown = (dueDateStr: string) => {
@@ -98,20 +47,19 @@ export const TaskBoard: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full gap-4">
-      {/* Quick Input Bar */}
-      <div className="glass-panel p-3 flex items-center gap-2">
-        <input
-          type="text"
-          placeholder="I want to..."
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') setShowAddForm(true);
-          }}
-          className="flex-1 bg-transparent text-sm border-none outline-none text-text-primary placeholder:text-text-muted"
-        />
+      {/* Quick Input Bar (Acts as a button shortcut to dedicated Create Task Page) */}
+      <div 
+        onClick={onCreateTask}
+        className="glass-panel p-3 flex items-center gap-2 cursor-pointer hover:border-white/12 transition-all select-none"
+      >
+        <div className="flex-1 text-sm text-text-muted text-left">
+          I want to...
+        </div>
         <button
-          onClick={triggerVoiceAssistant}
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerVoiceAssistant();
+          }}
           className={`p-2 rounded-lg transition-all ${
             isListening
               ? 'bg-cyan-500/20 text-cyan-400 animate-pulse'
@@ -122,87 +70,15 @@ export const TaskBoard: React.FC = () => {
           <Mic className="w-4 h-4" />
         </button>
         <button
-          onClick={() => setShowAddForm(!showAddForm)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onCreateTask();
+          }}
           className="p-2 rounded-lg hover:bg-white/5 text-text-secondary hover:text-white"
         >
           <Plus className="w-4 h-4" />
         </button>
       </div>
-
-      {/* Extended Task Creation Form */}
-      {showAddForm && (
-        <form onSubmit={handleQuickAdd} className="glass-panel p-4 space-y-4 animate-fadeIn">
-          <div className="space-y-1">
-            <span className="text-[10px] text-text-secondary uppercase tracking-wider">Task Title</span>
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full glass-input text-xs py-2"
-              placeholder="e.g., Study for Math Exam"
-            />
-          </div>
-          <div className="space-y-1">
-            <span className="text-[10px] text-text-secondary uppercase tracking-wider">Description</span>
-            <textarea
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-              className="w-full glass-input text-xs py-2 min-h-[50px] resize-none"
-              placeholder="What needs to be done?"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <span className="text-[10px] text-text-secondary uppercase tracking-wider">Due Date</span>
-              <input
-                type="datetime-local"
-                required
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="w-full glass-input text-xs py-2"
-              />
-            </div>
-            <div className="space-y-1">
-              <span className="text-[10px] text-text-secondary uppercase tracking-wider">Effort (Hours)</span>
-              <input
-                type="number"
-                min="0.1"
-                step="0.1"
-                required
-                value={effort}
-                onChange={(e) => setEffort(e.target.value)}
-                className="w-full glass-input text-xs py-2"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <span className="text-[10px] text-text-secondary uppercase tracking-wider">Category</span>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value as any)}
-                className="w-full glass-input text-xs py-2 bg-slate-950"
-              >
-                <option value="Work">Work</option>
-                <option value="Study">Study</option>
-                <option value="Personal">Personal</option>
-                <option value="Finance">Finance</option>
-                <option value="Urgent">Urgent</option>
-              </select>
-            </div>
-            <div className="flex items-end">
-              <button
-                type="submit"
-                disabled={isCreating}
-                className="w-full glass-btn glass-btn-primary justify-center text-xs py-2"
-              >
-                {isCreating ? 'Planning...' : 'Generate Plan'}
-              </button>
-            </div>
-          </div>
-        </form>
-      )}
 
       {/* Energy Level Selector */}
       <div className="glass-panel p-3">
@@ -240,8 +116,8 @@ export const TaskBoard: React.FC = () => {
         </div>
 
         {activeTasks.length === 0 ? (
-          <div className="text-center py-12 glass-panel">
-            <p className="text-xs text-text-muted">No active tasks. Add a task to start!</p>
+          <div className="text-center py-12 glass-panel cursor-pointer hover:border-white/8 transition-all" onClick={onCreateTask}>
+            <p className="text-xs text-text-muted">No active tasks. Click here to add one!</p>
           </div>
         ) : (
           activeTasks.map((task) => {
@@ -271,10 +147,10 @@ export const TaskBoard: React.FC = () => {
                   </div>
                 </div>
 
-                <h3 className="text-sm font-semibold text-text-primary mb-1 truncate">
+                <h3 className="text-sm font-semibold text-text-primary mb-1 truncate text-left">
                   {task.title}
                 </h3>
-                <p className="text-xs text-text-secondary line-clamp-1 mb-3">
+                <p className="text-xs text-text-secondary line-clamp-1 mb-3 text-left">
                   {task.description}
                 </p>
 
@@ -334,7 +210,7 @@ export const TaskBoard: React.FC = () => {
               <span className="text-violet-400">🔥</span> Why is this my priority?
             </h4>
             <div className="mb-4">
-              <span className="text-xs font-bold text-text-primary block mb-1">{selectedWhyTask.title}</span>
+              <span className="text-xs font-bold text-text-primary block mb-1 text-left">{selectedWhyTask.title}</span>
               <span className="text-[10px] text-text-muted">Panic Index: {selectedWhyTask.panicIndex}%</span>
             </div>
             <ul className="why-tooltip-reason-list">
@@ -370,4 +246,5 @@ export const TaskBoard: React.FC = () => {
     </div>
   );
 };
+
 export default TaskBoard;

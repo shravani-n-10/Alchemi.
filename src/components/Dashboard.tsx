@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTasks } from '../context/TaskContext';
 import { useAI } from '../context/AIContext';
 import TaskBoard from './TaskBoard';
 import AIPlanner from './AIPlanner';
 import AICoach from './AICoach';
 import FocusMode from './FocusMode';
-import { AlertOctagon, Sparkles, Calendar, Plus, Flame, Clock, Zap } from 'lucide-react';
+import { AlertOctagon, Flame, Calendar } from 'lucide-react';
 
-export const Dashboard: React.FC = () => {
+interface DashboardProps {
+  onCreateTask: () => void;
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({ onCreateTask }) => {
   const {
     tasks,
     updateTask,
@@ -17,7 +21,6 @@ export const Dashboard: React.FC = () => {
     userProfile,
     syncGoogleCalendar,
     googleCalendarSynced,
-    addTask,
     habits,
     toggleHabit,
   } = useTasks();
@@ -25,18 +28,7 @@ export const Dashboard: React.FC = () => {
   const {
     riskAssessment,
     dismissRiskAssessment,
-    getTaskBreakdown,
-    generateBriefing,
   } = useAI();
-
-  // Onboarding task creation modal state
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [title, setTitle] = useState('');
-  const [desc, setDesc] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [effort, setEffort] = useState('2');
-  const [category, setCategory] = useState<'Work' | 'Study' | 'Personal' | 'Finance' | 'Urgent'>('Work');
-  const [isCreating, setIsCreating] = useState(false);
 
   const handleExecuteRecovery = (type: 'de-scope' | 'reschedule') => {
     if (!riskAssessment) return;
@@ -64,53 +56,6 @@ export const Dashboard: React.FC = () => {
     dismissRiskAssessment();
   };
 
-  const handleCreateFirstTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !dueDate || isCreating) return;
-
-    setIsCreating(true);
-    try {
-      const createdTask = await addTask({
-        title: title.trim(),
-        description: desc.trim(),
-        category,
-        dueDate: new Date(dueDate).toISOString(),
-        estimatedEffort: parseFloat(effort) || 2,
-        energyLevel: 'medium',
-      });
-
-      // Trigger task breakdown in background
-      const breakdown = await getTaskBreakdown(createdTask.title, createdTask.description, createdTask.category);
-      updateTask(createdTask.id, {
-        subtasks: breakdown.subtasks.map((sub: any, idx: number) => ({
-          id: `sub-${idx}-${Date.now()}`,
-          title: sub.title,
-          duration: sub.duration,
-          completed: false,
-        })),
-        procrastinationWarning: breakdown.procrastinationWarning,
-        starterAsset: breakdown.starterAsset,
-      });
-
-      // Reset fields
-      setTitle('');
-      setDesc('');
-      setDueDate('');
-      setEffort('2');
-      setCategory('Work');
-      setShowAddModal(false);
-      
-      // Auto-trigger daily plan generation to instantly build their first day
-      setTimeout(() => {
-        generateBriefing();
-      }, 500);
-    } catch (err) {
-      console.error('Failed to create onboarding task:', err);
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
   const activeTasks = tasks.filter((t) => !t.completed);
   const totalEffort = activeTasks.reduce((sum, t) => sum + t.estimatedEffort, 0);
   const highestTask = [...activeTasks].sort((a, b) => b.panicIndex - a.panicIndex)[0];
@@ -131,7 +76,7 @@ export const Dashboard: React.FC = () => {
 
         <div className="flex items-center gap-4 justify-center">
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={onCreateTask}
             className="glass-btn glass-btn-primary py-3.5 px-8 text-sm font-bold"
           >
             ➕ Create Your First Task
@@ -185,91 +130,6 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Task Creation Modal */}
-        {showAddModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50">
-            <div className="glass-panel max-w-md w-full p-6 relative text-left">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="absolute top-4 right-4 text-text-secondary hover:text-white transition-colors"
-              >
-                ✕
-              </button>
-              <h3 className="text-base font-bold heading-outfit mb-4 text-text-primary">
-                Create Your First Task
-              </h3>
-              <form onSubmit={handleCreateFirstTask} className="space-y-4">
-                <div>
-                  <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Task Title</span>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g., Finish React Lab Record"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full glass-input text-xs py-2"
-                  />
-                </div>
-                <div>
-                  <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Description</span>
-                  <textarea
-                    placeholder="e.g., Code the state-based router and test on GH Pages"
-                    value={desc}
-                    onChange={(e) => setDesc(e.target.value)}
-                    className="w-full glass-input text-xs py-2 h-20 resize-none"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Category</span>
-                    <select
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value as any)}
-                      className="w-full glass-input text-xs py-2.5"
-                    >
-                      <option value="Work">Work</option>
-                      <option value="Study">Study</option>
-                      <option value="Personal">Personal</option>
-                      <option value="Finance">Finance</option>
-                      <option value="Urgent">Urgent</option>
-                    </select>
-                  </div>
-                  <div>
-                    <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Estimated Hours</span>
-                    <input
-                      type="number"
-                      min="0.5"
-                      max="12"
-                      step="0.5"
-                      required
-                      value={effort}
-                      onChange={(e) => setEffort(e.target.value)}
-                      className="w-full glass-input text-xs py-2"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Due Date & Time</span>
-                  <input
-                    type="datetime-local"
-                    required
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full glass-input text-xs py-2"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isCreating}
-                  className="w-full glass-btn glass-btn-primary justify-center text-xs py-3 mt-2"
-                >
-                  {isCreating ? 'Creating & Generating AI Plan...' : 'Create Task & Build Schedule'}
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
@@ -327,7 +187,7 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start flex-1 min-h-0">
         {/* Column 1: Task Board (Urgency Queue) */}
         <section className="h-full overflow-hidden min-h-[450px]">
-          <TaskBoard />
+          <TaskBoard onCreateTask={onCreateTask} />
         </section>
 
         {/* Column 2: AI Planner & Daily Timeline */}

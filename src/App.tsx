@@ -4,6 +4,7 @@ import { AIProvider, useAI } from './context/AIContext';
 import LandingPage from './components/LandingPage';
 import SignInPage from './components/SignInPage';
 import Dashboard from './components/Dashboard';
+import CreateTaskPage from './components/CreateTaskPage';
 import Analytics from './components/Analytics';
 import Settings from './components/Settings';
 import { 
@@ -373,7 +374,12 @@ const AppContent: React.FC = () => {
 
         {/* WORKSPACE (DASHBOARD) */}
         {currentPage === 'dashboard' && userProfile.isLoggedIn && (
-          <Dashboard />
+          <Dashboard onCreateTask={() => setCurrentPage('create-task')} />
+        )}
+
+        {/* CREATE TASK PAGE */}
+        {currentPage === 'create-task' && userProfile.isLoggedIn && (
+          <CreateTaskPage onBack={() => setCurrentPage('dashboard')} onSuccess={() => setCurrentPage('dashboard')} />
         )}
 
         {/* REFLECTION & ANALYTICS */}
