@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTasks } from '../context/TaskContext';
-import { Sparkles, Calendar, LogIn, ChevronRight, Compass } from 'lucide-react';
+import { Sparkles, Calendar, ChevronRight, Compass } from 'lucide-react';
 
 interface LandingPageProps {
   onEnter: () => void;
@@ -224,19 +224,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, on
         <p>Powered by Google AI Studio</p>
       </footer>
 
-      {/* Google Authentication Modal */}
+      {/* Google Authentication Modal (Styled via Vanilla CSS) */}
       {isAuthModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="glass-panel max-w-sm w-full p-6 relative text-center">
+        <div className="modal-overlay">
+          <div className="modal-container animate-fadeIn">
             <button
               onClick={closeAuthModal}
-              className="absolute top-4 right-4 text-text-secondary hover:text-white transition-colors"
+              className="modal-close"
             >
               ✕
             </button>
 
-            <div className="flex flex-col items-center mb-6">
-              <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md mb-3">
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md mb-2">
+                {/* Google Icon */}
                 <svg className="w-6 h-6" viewBox="0 0 24 24">
                   <path
                     fill="#EA4335"
@@ -256,52 +257,54 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, on
                   />
                 </svg>
               </div>
-              <h3 className="text-base font-bold heading-outfit text-text-primary">
+              <h3 className="modal-title">
                 Sign in with Google
               </h3>
-              <p className="text-[10px] text-text-secondary mt-1">
+              <p className="modal-subtitle">
                 To continue to your Alchemi Productivity Workspace
               </p>
             </div>
 
+            {/* Quick One-Click Google Login */}
             <button
               onClick={handleDemoLogin}
-              className="w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-white text-slate-900 hover:bg-slate-100 transition-all font-semibold text-xs shadow"
+              className="google-signin-btn"
             >
               One-Click Demo Login (Alex Mercer)
             </button>
 
-            <div className="flex items-center my-4">
-              <div className="flex-1 h-px bg-white/10"></div>
-              <span className="px-3 text-[9px] text-text-muted uppercase font-bold">Or Customize Account</span>
-              <div className="flex-1 h-px bg-white/10"></div>
+            <div className="modal-divider">
+              <div className="modal-divider-line"></div>
+              <span className="modal-divider-text">Or Customize Account</span>
+              <div className="modal-divider-line"></div>
             </div>
 
-            <form onSubmit={handleCustomLogin} className="space-y-3 text-left">
-              <div>
-                <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Full Name</span>
+            {/* Custom Google Login Form */}
+            <form onSubmit={handleCustomLogin} className="flex flex-col items-center w-full">
+              <div className="form-group">
+                <label className="form-label">Full Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g., John Doe"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full glass-input text-xs py-2"
+                  className="form-input"
                 />
               </div>
-              <div>
-                <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Email Address</span>
+              <div className="form-group">
+                <label className="form-label">Email Address</label>
                 <input
                   type="email"
                   placeholder="e.g., john.doe@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full glass-input text-xs py-2"
+                  className="form-input"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full glass-btn glass-btn-primary justify-center text-xs py-2.5 mt-2"
+                className="glass-btn glass-btn-primary w-full justify-center text-xs py-3 mt-2"
               >
                 Sign In & Enter Workspace
               </button>
