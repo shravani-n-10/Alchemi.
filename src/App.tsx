@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { TaskProvider, useTasks } from './context/TaskContext';
 import { AIProvider, useAI } from './context/AIContext';
 import LandingPage from './components/LandingPage';
+import SignInPage from './components/SignInPage';
 import Dashboard from './components/Dashboard';
 import Analytics from './components/Analytics';
 import Settings from './components/Settings';
@@ -36,15 +37,12 @@ const starsArray = Array.from({ length: 15 }).map((_, i) => ({
   char: Math.random() > 0.5 ? '✦' : '★',
 }));
 
-
-
 const AppContent: React.FC = () => {
   const { userProfile, logout } = useTasks();
   const { isSpeaking, stopSpeaking } = useAI();
-  const [currentPage, setCurrentPage] = useState<'home' | 'about' | 'guide' | 'dashboard' | 'analytics'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'signin' | 'about' | 'guide' | 'dashboard' | 'analytics'>('home');
   const [showSettings, setShowSettings] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -53,7 +51,10 @@ const AppContent: React.FC = () => {
     if (userProfile.isLoggedIn) {
       setCurrentPage('dashboard');
     } else {
-      setCurrentPage('home');
+      // Avoid kicking user back to home if they are on about/guide/signin page
+      if (currentPage === 'dashboard' || currentPage === 'analytics') {
+        setCurrentPage('home');
+      }
     }
   }, [userProfile.isLoggedIn]);
 
@@ -161,8 +162,8 @@ const AppContent: React.FC = () => {
 
             {!userProfile.isLoggedIn ? (
               <button
-                onClick={() => setShowAuthModal(true)}
-                className="glass-btn text-xs py-1.5 px-4 border border-violet-500/20 hover:border-violet-500/40 text-violet-300 flex items-center gap-1.5"
+                onClick={() => setCurrentPage('signin')}
+                className={`glass-btn text-xs py-1.5 px-4 border border-violet-500/20 hover:border-violet-500/40 text-violet-300 flex items-center gap-1.5 ${currentPage === 'signin' ? 'bg-white/10 border-violet-400' : ''}`}
               >
                 <LogIn className="w-3.5 h-3.5" /> Sign In
               </button>
@@ -237,7 +238,12 @@ const AppContent: React.FC = () => {
       <div className="flex-1 flex flex-col">
         {/* HOME PAGE */}
         {currentPage === 'home' && (
-          <LandingPage onEnter={() => setCurrentPage('dashboard')} showModal={showAuthModal} onCloseModal={() => setShowAuthModal(false)} />
+          <LandingPage onStart={() => setCurrentPage('signin')} />
+        )}
+
+        {/* SIGN IN PAGE */}
+        {currentPage === 'signin' && (
+          <SignInPage onEnter={() => setCurrentPage('dashboard')} onBack={() => setCurrentPage('home')} />
         )}
 
         {/* ABOUT PAGE */}
