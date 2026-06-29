@@ -105,6 +105,65 @@ export const AIPlanner: React.FC = () => {
         </div>
       )}
 
+      {/* AI Progress Timeline */}
+      {tasks.length > 0 && (
+        <div className="glass-panel p-4 space-y-3.5 border-violet-500/15 bg-violet-950/2 animate-fadeIn text-left">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-violet-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" /> AI Planning Progress
+            </span>
+            <span className="text-[9px] text-text-muted">Step-by-Step</span>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[11px]">
+            {/* Step 1: Calendar Synced */}
+            <div className="flex items-center gap-2">
+              <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${googleCalendarSynced ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-white/5 text-text-muted'}`}>
+                {googleCalendarSynced ? '✓' : '1'}
+              </span>
+              <span className={googleCalendarSynced ? 'text-text-secondary line-through font-medium' : 'text-white font-medium'}>
+                Calendar Connected
+              </span>
+            </div>
+            
+            <div className="text-text-muted hidden sm:block">→</div>
+
+            {/* Step 2: Panic Index Calculated */}
+            <div className="flex items-center gap-2">
+              <span className="w-4 h-4 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 flex items-center justify-center text-[9px] font-bold shrink-0">
+                ✓
+              </span>
+              <span className="text-text-secondary line-through font-medium">
+                Panic Computed
+              </span>
+            </div>
+
+            <div className="text-text-muted hidden sm:block">→</div>
+
+            {/* Step 3: Schedule Generated */}
+            <div className="flex items-center gap-2">
+              <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${dailyPlan ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-white/5 text-text-muted'}`}>
+                {dailyPlan ? '✓' : '3'}
+              </span>
+              <span className={dailyPlan ? 'text-text-secondary line-through font-medium' : 'text-white font-medium'}>
+                Schedule Built
+              </span>
+            </div>
+
+            <div className="text-text-muted hidden sm:block">→</div>
+
+            {/* Step 4: Ready to Begin */}
+            <div className="flex items-center gap-2">
+              <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${activeTask && dailyPlan ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30 animate-pulse' : 'bg-white/5 text-text-muted'}`}>
+                {activeTask && dailyPlan ? '★' : '4'}
+              </span>
+              <span className={activeTask && dailyPlan ? 'text-violet-300 font-bold' : 'text-text-muted font-medium'}>
+                Ready to Focus
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Active Task Details (Mission Briefing) */}
       {activeTask ? (
         <div className="glass-panel p-5 space-y-5 animate-fadeIn">

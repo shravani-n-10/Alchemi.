@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAI } from '../context/AIContext';
 import { useTasks } from '../context/TaskContext';
-import { Send, X } from 'lucide-react';
+import { Send, X, Sparkles } from 'lucide-react';
 
 export const AICoach: React.FC = () => {
   const {
@@ -12,9 +12,10 @@ export const AICoach: React.FC = () => {
     sendMessage,
     triggerVoiceAssistant,
     stopSpeaking,
+    generateBriefing,
   } = useAI();
 
-  const { settings } = useTasks();
+  const { settings, tasks, dailyPlan } = useTasks();
   const [inputText, setInputText] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -121,6 +122,18 @@ export const AICoach: React.FC = () => {
             <span className="text-[8px] text-text-muted mt-1">{msg.timestamp}</span>
           </div>
         ))}
+        {!dailyPlan && tasks.length > 0 && (
+          <div className="mr-auto items-start max-w-[85%] mt-2 animate-fadeIn">
+            <button
+              type="button"
+              onClick={() => generateBriefing()}
+              disabled={isProcessing}
+              className="glass-btn text-[10px] py-2 px-3 border-violet-500/30 text-violet-300 hover:bg-violet-500/10 flex items-center gap-1.5 font-bold"
+            >
+              <Sparkles className="w-3.5 h-3.5" /> {isProcessing ? 'Scheduling...' : 'Generate Plan'}
+            </button>
+          </div>
+        )}
         <div ref={chatEndRef}></div>
       </div>
 

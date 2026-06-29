@@ -43,18 +43,43 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [briefing, setBriefing] = useState('');
   const [riskAssessment, setRiskAssessment] = useState<any>(null);
 
-  // Initialize chat history with a greeting from Alchem-AI
+  // Initialize chat history with a dynamic greeting from Alchem-AI
   useEffect(() => {
-    const greeting = "Greetings! I am Alchem-AI, your productivity coach. Enter your Gemini API key in Settings to unlock my full potential, or let's start in Demo Mode right now. Tell me, what is our goal today?";
+    if (tasks.length > 0) {
+      const active = tasks.filter(t => !t.completed);
+      if (active.length > 0) {
+        const highest = [...active].sort((a, b) => b.panicIndex - a.panicIndex)[0];
+        let greetingText = `👋 Good Afternoon! You have ${active.length} active task${active.length > 1 ? 's' : ''} today. Your highest priority is "${highest.title}".`;
+        
+        if (!dailyPlan) {
+          greetingText += " Would you like me to build today's schedule?";
+        } else {
+          greetingText += " Your daily schedule is ready. Let's start a focus session when you are ready!";
+        }
+
+        setChatHistory([
+          {
+            id: `msg-init-${Date.now()}`,
+            sender: 'ai',
+            text: greetingText,
+            timestamp: new Date().toLocaleTimeString(),
+          },
+        ]);
+        return;
+      }
+    }
+
+    // Default welcome
+    const defaultGreeting = "Greetings! I am Alchem-AI, your productivity coach. Tell me, what is our goal today?";
     setChatHistory([
       {
-        id: `msg-${Date.now()}`,
+        id: `msg-init-${Date.now()}`,
         sender: 'ai',
-        text: greeting,
+        text: defaultGreeting,
         timestamp: new Date().toLocaleTimeString(),
       },
     ]);
-  }, []);
+  }, [tasks.length, !!dailyPlan]);
 
   const apiKey = settings.geminiApiKey;
   const useLocal = !apiKey || settings.useLocalAI;
