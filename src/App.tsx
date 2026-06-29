@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TaskProvider, useTasks } from './context/TaskContext';
-import { AIProvider, useAI } from './context/AIProvider'; // wait, it is AIContext in our project!
+import { AIProvider, useAI } from './context/AIContext';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 import Analytics from './components/Analytics';
@@ -14,7 +14,8 @@ import {
   MoreVertical, 
   Globe,
   LayoutDashboard,
-  HelpCircle
+  HelpCircle,
+  BookOpen
 } from 'lucide-react';
 
 // Generate static list of random sparkles once to avoid re-rendering flashes
@@ -35,8 +36,7 @@ const starsArray = Array.from({ length: 15 }).map((_, i) => ({
   char: Math.random() > 0.5 ? '✦' : '★',
 }));
 
-// We use the AIContext, let's make sure it's imported correctly from context/AIContext
-import { useAI } from './context/AIContext';
+
 
 const AppContent: React.FC = () => {
   const { userProfile, logout } = useTasks();
