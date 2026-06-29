@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Task, SubTask, UserSettings, FocusSession, DailyPlan } from '../types';
+import { Task, SubTask, UserSettings, FocusSession, DailyPlan, UserProfile } from '../types';
 import { calculatePanicIndex } from '../utils/panic';
-import { generateLocalDailyBriefing } from '../utils/localAI';
 
 interface Habit {
   id: string;
@@ -17,6 +16,7 @@ interface TaskContextType {
   dailyPlan: DailyPlan | null;
   energyLevel: 'low' | 'medium' | 'high';
   settings: UserSettings;
+  userProfile: UserProfile;
   activeTaskId: string | null;
   activeSession: { taskId: string; subtaskId?: string; startTime: string } | null;
   addTask: (task: Omit<Task, 'id' | 'panicIndex' | 'silentKiller' | 'createdAt' | 'subtasks' | 'completed'> & { subtasks?: SubTask[] }) => Promise<Task>;
@@ -31,6 +31,8 @@ interface TaskContextType {
   toggleHabit: (habitId: string) => void;
   setDailyPlan: (plan: DailyPlan) => void;
   setActiveTaskId: (id: string | null) => void;
+  loginWithGoogle: (name: string, email: string) => void;
+  logout: () => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -50,6 +52,13 @@ const DEFAULT_HABITS: Habit[] = [
   { id: 'h2', title: 'Deep Work Session (50 mins)', streak: 0 },
   { id: 'h3', title: 'Plan Tomorrow', streak: 0 },
 ];
+
+const DEFAULT_PROFILE: UserProfile = {
+  name: '',
+  email: '',
+  avatarUrl: '',
+  isLoggedIn: false,
+};
 
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -80,6 +89,11 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [settings, setSettings] = useState<UserSettings>(() => {
     const saved = localStorage.getItem('alchemi_settings');
     return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
+  });
+
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
+    const saved = localStorage.getItem('alchemi_profile');
+    return saved ? JSON.parse(saved) : DEFAULT_PROFILE;
   });
 
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
@@ -114,6 +128,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('alchemi_settings', JSON.stringify(settings));
   }, [settings]);
 
+  useEffect(() => {
+    localStorage.setItem('alchemi_profile', JSON.stringify(userProfile));
+  }, [userProfile]);
+
   // Background Ticker: Recalculate Panic Index of all active tasks every 60 seconds
   useEffect(() => {
     const interval = setInterval(() => {
@@ -134,7 +152,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ): Promise<Task> => {
     const panicIndex = calculatePanicIndex(taskData.estimatedEffort, taskData.dueDate, energyLevel);
     
-    // Check if task is a Silent Killer: Due date > 48h but estimated effort > 8 hours
     const dueTime = new Date(taskData.dueDate).getTime();
     const diffHours = (dueTime - Date.now()) / (1000 * 60 * 60);
     const silentKiller = diffHours > 48 && taskData.estimatedEffort >= 8;
@@ -151,7 +168,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setTasks((prev) => {
       const updated = [...prev, newTask];
-      // Sort by Panic Index descending
       return updated.sort((a, b) => b.panicIndex - a.panicIndex);
     });
 
@@ -163,7 +179,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       prev.map((t) => {
         if (t.id === taskId) {
           const updated = { ...t, ...updates };
-          // Re-calculate Panic Index if effort or due date changed
           if (updates.estimatedEffort !== undefined || updates.dueDate !== undefined) {
             updated.panicIndex = calculatePanicIndex(
               updated.estimatedEffort,
@@ -211,13 +226,11 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const updatedSubtasks = t.subtasks.map((sub) =>
             sub.id === subtaskId ? { ...sub, completed: !sub.completed } : sub
           );
-          // If all subtasks are completed, we don't automatically complete the main task,
-          // but we can update the task details.
           const allDone = updatedSubtasks.every((sub) => sub.completed);
           return {
             ...t,
             subtasks: updatedSubtasks,
-            completed: allDone ? t.completed : false, // Optionally let user complete manually
+            completed: allDone ? t.completed : false,
           };
         }
         return t;
@@ -227,7 +240,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setEnergyLevel = (level: 'low' | 'medium' | 'high') => {
     setEnergyLevelState(level);
-    // Instantly recalculate Panic Index of all tasks
     setTasks((prev) =>
       prev
         .map((t) => {
@@ -268,7 +280,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setFocusSessions((prev) => [...prev, newSession]);
 
-    // If milestone was completed and it was a subtask, mark it complete in the task list
     if (completedMilestone && activeSession.subtaskId) {
       toggleSubTask(activeSession.taskId, activeSession.subtaskId);
     }
@@ -297,6 +308,25 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setDailyPlanState(plan);
   };
 
+  const loginWithGoogle = (name: string, email: string) => {
+    // Generate a premium avatar based on their name initials or a cool abstract shape
+    const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const avatarId = (hash % 70) + 1;
+    setUserProfile({
+      name,
+      email,
+      avatarUrl: `https://i.pravatar.cc/150?img=${avatarId}`,
+      isLoggedIn: true,
+    });
+  };
+
+  const logout = () => {
+    setUserProfile(DEFAULT_PROFILE);
+    setDailyPlanState(null);
+    setActiveTaskId(null);
+    setActiveSession(null);
+  };
+
   return (
     <TaskContext.Provider
       value={{
@@ -306,6 +336,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         dailyPlan,
         energyLevel,
         settings,
+        userProfile,
         activeTaskId,
         activeSession,
         addTask,
@@ -320,6 +351,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleHabit,
         setDailyPlan,
         setActiveTaskId,
+        loginWithGoogle,
+        logout,
       }}
     >
       {children}

@@ -1,3 +1,10 @@
+export interface UserProfile {
+  name: string;
+  email: string;
+  avatarUrl: string;
+  isLoggedIn: boolean;
+}
+
 export interface UserSettings {
   geminiApiKey: string;
   useLocalAI: boolean;
