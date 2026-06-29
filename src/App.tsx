@@ -70,9 +70,9 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col relative z-10 text-text-primary">
       {/* Global Glassmorphic Navbar */}
-      <header className="px-6 py-3.5 flex items-center justify-between border-b border-white/5 bg-white/5 backdrop-blur-md sticky top-0 z-40">
+      <header className="navbar">
         {/* Left Side: Brand Logo */}
-        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setCurrentPage(userProfile.isLoggedIn ? 'dashboard' : 'home')}>
+        <div className="navbar-logo" onClick={() => setCurrentPage(userProfile.isLoggedIn ? 'dashboard' : 'home')}>
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center shadow-lg shadow-violet-500/10">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
@@ -80,32 +80,29 @@ const AppContent: React.FC = () => {
             <h1 className="text-lg font-extrabold heading-outfit tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-text-primary to-violet-300">
               ALCHEMI
             </h1>
-            <span className="text-[9px] text-violet-400 font-bold uppercase tracking-widest block -mt-0.5">
-              AI Productivity OS
-            </span>
           </div>
         </div>
 
         {/* Right Side: Navigation Links & Actions grouped together */}
-        <div className="flex items-center gap-8">
-          <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-text-secondary">
+        <div className="navbar-right">
+          <nav className="navbar-links">
             {!userProfile.isLoggedIn ? (
               <>
                 <button 
                   onClick={() => setCurrentPage('home')} 
-                  className={`hover:text-white transition-colors py-1 ${currentPage === 'home' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                  className={`nav-link ${currentPage === 'home' ? 'active' : ''}`}
                 >
                   Home
                 </button>
                 <button 
                   onClick={() => setCurrentPage('about')} 
-                  className={`hover:text-white transition-colors py-1 ${currentPage === 'about' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                  className={`nav-link ${currentPage === 'about' ? 'active' : ''}`}
                 >
                   About Us
                 </button>
                 <button 
                   onClick={() => setCurrentPage('guide')} 
-                  className={`hover:text-white transition-colors py-1 ${currentPage === 'guide' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                  className={`nav-link ${currentPage === 'guide' ? 'active' : ''}`}
                 >
                   Guide / Info
                 </button>
@@ -114,25 +111,25 @@ const AppContent: React.FC = () => {
               <>
                 <button 
                   onClick={() => setCurrentPage('dashboard')} 
-                  className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${currentPage === 'dashboard' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                  className={`nav-link flex items-center gap-1.5 ${currentPage === 'dashboard' ? 'active' : ''}`}
                 >
                   <LayoutDashboard className="w-3.5 h-3.5" /> Workspace
                 </button>
                 <button 
                   onClick={() => setCurrentPage('analytics')} 
-                  className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${currentPage === 'analytics' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                  className={`nav-link flex items-center gap-1.5 ${currentPage === 'analytics' ? 'active' : ''}`}
                 >
                   <BarChart2 className="w-3.5 h-3.5" /> Reflection
                 </button>
                 <button 
                   onClick={() => setCurrentPage('about')} 
-                  className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${currentPage === 'about' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                  className={`nav-link flex items-center gap-1.5 ${currentPage === 'about' ? 'active' : ''}`}
                 >
                   <Globe className="w-3.5 h-3.5" /> About
                 </button>
                 <button 
                   onClick={() => setCurrentPage('guide')} 
-                  className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${currentPage === 'guide' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                  className={`nav-link flex items-center gap-1.5 ${currentPage === 'guide' ? 'active' : ''}`}
                 >
                   <HelpCircle className="w-3.5 h-3.5" /> Guide
                 </button>
