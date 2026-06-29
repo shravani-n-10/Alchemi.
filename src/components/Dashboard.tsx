@@ -5,7 +5,8 @@ import TaskBoard from './TaskBoard';
 import AIPlanner from './AIPlanner';
 import AICoach from './AICoach';
 import FocusMode from './FocusMode';
-import { AlertOctagon, Flame, Calendar } from 'lucide-react';
+import CreateTaskPage from './CreateTaskPage';
+import { AlertOctagon, Flame, Calendar, Sparkles } from 'lucide-react';
 
 interface DashboardProps {
   onCreateTask: () => void;
@@ -61,75 +62,66 @@ export const Dashboard: React.FC<DashboardProps> = ({ onCreateTask }) => {
   const highestTask = [...activeTasks].sort((a, b) => b.panicIndex - a.panicIndex)[0];
   const riskLevel = riskAssessment?.riskLevel || (highestTask?.panicIndex > 75 ? 'HIGH' : highestTask?.panicIndex > 40 ? 'MEDIUM' : 'LOW');
 
-  // 1. FIRST-TIME USER ONBOARDING VIEW
+  // 1. FIRST-TIME USER ONBOARDING WIZARD
+  const [onboardingStep, setOnboardingStep] = React.useState<1 | 2>(1);
+
   if (tasks.length === 0) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-4xl mx-auto space-y-8 animate-fadeIn h-[calc(100vh-70px)] overflow-y-auto relative z-10">
-        <div className="space-y-3">
-          <h2 className="text-[40px] font-black heading-outfit text-white leading-tight">
-            👋 Welcome, {userProfile.name || 'Alchemist'}
-          </h2>
-          <p className="text-[20px] text-text-secondary max-w-xl mx-auto leading-normal">
-            Your AI Productivity Companion is ready. Let's build today's plan.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-4 justify-center">
-          <button
-            onClick={onCreateTask}
-            className="glass-btn glass-btn-primary py-3.5 px-8 text-sm font-bold"
-          >
-            ➕ Create Your First Task
-          </button>
-          {!googleCalendarSynced ? (
-            <button
-              onClick={syncGoogleCalendar}
-              className="glass-btn py-3.5 px-8 text-sm border-white/8 hover:border-white/15"
-            >
-              📅 Import Google Calendar
-            </button>
-          ) : (
-            <span className="glass-btn py-3.5 px-8 text-sm border-green-500/20 text-green-300 bg-green-950/5">
-              🟢 Calendar Imported (3 events)
+    if (onboardingStep === 1) {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-xl mx-auto space-y-8 animate-fadeIn h-[calc(100vh-70px)] overflow-y-auto relative z-10">
+          <div className="space-y-3">
+            <span className="text-[10px] font-bold text-violet-400 uppercase tracking-widest bg-violet-500/10 px-3.5 py-1.5 rounded-full border border-violet-500/15 inline-flex items-center gap-1.5 mx-auto">
+              <Sparkles className="w-3.5 h-3.5" /> Step 1 of 2
             </span>
-          )}
-        </div>
+            <h2 className="text-[40px] font-black heading-outfit text-white leading-tight">
+              👋 Welcome to Alchemi
+            </h2>
+            <p className="text-[20px] text-text-secondary max-w-md mx-auto leading-normal">
+              "I'm your AI productivity companion."
+            </p>
+          </div>
 
-        {/* First Time User Card */}
-        <div className="glass-panel p-8 max-w-lg w-full border-violet-500/10 shadow-2xl text-left space-y-6">
-          <h3 className="text-[22px] font-extrabold heading-outfit text-white">Welcome to Alchemi</h3>
-          
-          <div className="space-y-4">
-            <div className="flex gap-4 items-start">
-              <span className="w-6 h-6 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
-              <div>
-                <h4 className="text-sm font-bold text-white">Create your first task</h4>
-                <p className="text-xs text-text-secondary mt-0.5">Tell Alchemi what you need to achieve and when it's due.</p>
+          <div className="glass-panel p-8 w-full border-violet-500/10 shadow-2xl space-y-6 text-center">
+            <p className="text-xs text-text-secondary leading-relaxed">
+              Connect your Google Calendar to allow Alchemi to import your meetings, classes, and exams to automatically schedule focus blocks in your free slots.
+            </p>
+            
+            {!googleCalendarSynced ? (
+              <button
+                type="button"
+                onClick={syncGoogleCalendar}
+                className="w-full glass-btn glass-btn-primary py-3.5 justify-center text-sm font-bold flex items-center gap-2"
+              >
+                <Calendar className="w-4.5 h-4.5" /> Connect Google Calendar
+              </button>
+            ) : (
+              <div className="p-4 rounded-xl bg-green-950/25 border border-green-500/20 text-green-300 font-semibold text-xs flex items-center justify-center gap-2">
+                <span>🟢 Google Calendar Connected (3 events imported)</span>
               </div>
-            </div>
-            <div className="flex gap-4 items-start">
-              <span className="w-6 h-6 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
-              <div>
-                <h4 className="text-sm font-bold text-white">AI calculates Panic Index</h4>
-                <p className="text-xs text-text-secondary mt-0.5">Our agents compute your deadline risk based on energy and effort.</p>
-              </div>
-            </div>
-            <div className="flex gap-4 items-start">
-              <span className="w-6 h-6 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
-              <div>
-                <h4 className="text-sm font-bold text-white">AI builds your schedule</h4>
-                <p className="text-xs text-text-secondary mt-0.5">Alchemi fits study blocks around your meetings and classes.</p>
-              </div>
-            </div>
-            <div className="flex gap-4 items-start">
-              <span className="w-6 h-6 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</span>
-              <div>
-                <h4 className="text-sm font-bold text-white">Focus Mode begins</h4>
-                <p className="text-xs text-text-secondary mt-0.5">Start work with ambient soundscapes and get starter assets.</p>
-              </div>
+            )}
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setOnboardingStep(2)}
+                className="w-full glass-btn py-3 justify-center text-xs border-white/5 hover:border-white/12 text-white font-bold"
+              >
+                {googleCalendarSynced ? 'Continue to Task Creation →' : 'Skip & Continue to Task Creation →'}
+              </button>
             </div>
           </div>
         </div>
+      );
+    }
+
+    // Step 2: Create your first task
+    return (
+      <div className="w-full h-[calc(100vh-70px)] overflow-hidden">
+        <CreateTaskPage 
+          onBack={() => setOnboardingStep(1)} 
+          onSuccess={() => {}} 
+          isOnboarding={true}
+        />
       </div>
     );
   }

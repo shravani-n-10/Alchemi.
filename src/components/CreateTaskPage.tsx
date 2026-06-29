@@ -8,9 +8,10 @@ import speechService from '../services/speech';
 interface CreateTaskPageProps {
   onBack: () => void;
   onSuccess: () => void;
+  isOnboarding?: boolean;
 }
 
-export const CreateTaskPage: React.FC<CreateTaskPageProps> = ({ onBack, onSuccess }) => {
+export const CreateTaskPage: React.FC<CreateTaskPageProps> = ({ onBack, onSuccess, isOnboarding }) => {
   const { addTask, updateTask, energyLevel, googleCalendarSynced, syncGoogleCalendar } = useTasks();
   const { getTaskBreakdown, generateBriefing } = useAI();
 
@@ -290,12 +291,14 @@ export const CreateTaskPage: React.FC<CreateTaskPageProps> = ({ onBack, onSucces
     <div className="flex-1 flex flex-col items-center p-6 md:p-12 max-w-5xl mx-auto w-full relative z-10 animate-fadeIn h-[calc(100vh-70px)] overflow-y-auto">
       {/* Header */}
       <div className="w-full flex flex-col items-start gap-4 mb-8">
-        <button 
-          onClick={onBack} 
-          className="text-text-secondary hover:text-white transition-colors flex items-center gap-1.5 text-xs bg-none border-none cursor-pointer outline-none"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-        </button>
+        {!isOnboarding && (
+          <button 
+            onClick={onBack} 
+            className="text-text-secondary hover:text-white transition-colors flex items-center gap-1.5 text-xs bg-none border-none cursor-pointer outline-none"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+          </button>
+        )}
         <div className="text-left space-y-1">
           <h2 className="text-2xl font-extrabold heading-outfit text-white">Create New Task</h2>
           <p className="text-xs text-text-secondary">
