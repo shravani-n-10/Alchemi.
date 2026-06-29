@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Calendar, ChevronRight, Compass } from 'lucide-react';
+import { Sparkles, Calendar, Compass, Layers, Zap, ShieldAlert, ArrowRight, HelpCircle } from 'lucide-react';
 
 interface LandingPageProps {
   onStart: () => void;
@@ -26,7 +26,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         <div className="hero-divider">── ✦ ──</div>
 
         <p className="hero-description">
-          Alchemi helps you beat procrastination by converting passive reminders into active, AI-scheduled task execution. It calculates your urgency using a dynamic <span className="text-pink">Panic Index</span>, breaks down complex goals, and generates <span className="text-cyan">AI Starter Drafts</span> so you can begin working immediately.
+          <strong>Meet Alchemi — Your AI Productivity Companion</strong><br />
+          Plans your day, predicts deadline risks, breaks work into actionable steps, and helps you finish before it's too late. It calculates your urgency using a dynamic <span className="text-pink">Panic Index</span> and generates <span className="text-cyan">AI Starter Drafts</span> so you can begin working immediately.
         </p>
 
         <div className="hero-buttons">
@@ -43,14 +44,41 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             Explore Features <span className="text-xs">↗</span>
           </a>
         </div>
+
+        {/* Dynamic Live Product Preview Card */}
+        <div className="mock-briefing-card animate-fadeIn">
+          <div className="mock-briefing-header">
+            <span className="w-2 h-2 rounded-full bg-pink-500 animate-ping"></span>
+            🟣 AI Daily Briefing
+          </div>
+          <h4 className="mock-briefing-title">Good Morning 👋</h4>
+          
+          <div className="mock-briefing-risk-row">
+            <span className="mock-briefing-risk-label">TODAY'S DEADLINE RISK</span>
+            <span className="mock-briefing-risk-value">HIGH (86%)</span>
+          </div>
+
+          <div className="mock-briefing-task-box">
+            <h5 className="mock-briefing-task-title">🔥 DBMS Assignment</h5>
+            <span className="mock-briefing-task-due">Due: Tomorrow at 10:00 AM</span>
+            
+            <p className="mock-briefing-recommendation">
+              <strong>Recommendation:</strong> Start now. Estimated efforts require 2h 15m. Delaying this past 6:00 PM today raises risk to critical levels.
+            </p>
+          </div>
+
+          <button onClick={onStart} className="glass-btn glass-btn-primary w-full justify-center py-2.5 text-xs">
+            Start Focus Session
+          </button>
+        </div>
       </main>
 
       {/* Features Section */}
-      <section id="features" className="features-section relative z-20">
-        <div className="features-header">
-          <h3 className="features-title">How Alchemi Helps You Execute</h3>
-          <p className="features-subtitle">
-            Three autonomous AI agents work together behind the scenes to help you plan, prioritize, and complete your work before deadlines.
+      <section id="features" className="landing-section relative z-20">
+        <div className="section-header">
+          <h3 className="section-title">How Alchemi Helps You Execute</h3>
+          <p className="section-subtitle">
+            Three autonomous AI agents coordinate in the background to streamline your execution and protect your focus.
           </p>
         </div>
 
@@ -169,6 +197,164 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section id="how-it-works" className="landing-section relative z-20">
+        <div className="section-header">
+          <h3 className="section-title">The Execution Pipeline</h3>
+          <p className="section-subtitle">
+            How Alchemi transforms chaotic, last-minute panic into structured, step-by-step progress.
+          </p>
+        </div>
+
+        <div className="workflow-timeline">
+          <div className="workflow-step">
+            <div className="workflow-step-number">01</div>
+            <span className="workflow-step-title">Add Goals</span>
+          </div>
+          <div className="workflow-step">
+            <div className="workflow-step-number" style={{ borderColor: 'var(--color-warning)' }}>02</div>
+            <span className="workflow-step-title">AI Computes Panic Index</span>
+          </div>
+          <div className="workflow-step">
+            <div className="workflow-step-number" style={{ borderColor: 'var(--color-urgent)' }}>03</div>
+            <span className="workflow-step-title">AI Generates Plan & Drafts</span>
+          </div>
+          <div className="workflow-step">
+            <div className="workflow-step-number" style={{ borderColor: 'var(--color-critical)' }}>04</div>
+            <span className="workflow-step-title">Execute in Focus Mode</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Alchemi Section */}
+      <section id="why-alchemi" className="landing-section relative z-20">
+        <div className="section-header">
+          <h3 className="section-title">Why Alchemi?</h3>
+          <p className="section-subtitle">
+            Most to-do lists are passive dumpsters of tasks. Alchemi is an active execution assistant.
+          </p>
+        </div>
+
+        <div className="comparison-table-wrapper">
+          <table className="comparison-table">
+            <thead>
+              <tr>
+                <th>Feature Capability</th>
+                <th>Traditional To-Do Apps</th>
+                <th>Alchemi OS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Task Reminders</strong></td>
+                <td className="comparison-traditional">Static reminders</td>
+                <td className="comparison-alchemi">Dynamic adaptive planning</td>
+              </tr>
+              <tr>
+                <td><strong>Prioritization</strong></td>
+                <td className="comparison-traditional">Manual ranking</td>
+                <td className="comparison-alchemi">AI energy & deadline indexation</td>
+              </tr>
+              <tr>
+                <td><strong>Daily Scheduling</strong></td>
+                <td className="comparison-traditional">Fixed times (rigid)</td>
+                <td className="comparison-alchemi">Continuous calendar block replanning</td>
+              </tr>
+              <tr>
+                <td><strong>Deadline Risk Analysis</strong></td>
+                <td className="comparison-traditional">No risk prediction</td>
+                <td className="comparison-alchemi">Proactive warning indicators</td>
+              </tr>
+              <tr>
+                <td><strong>Decision Guidance</strong></td>
+                <td className="comparison-traditional">User decides everything</td>
+                <td className="comparison-alchemi">AI recommends immediate next actions</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* AI Agent Section */}
+      <section id="agents" className="landing-section relative z-20">
+        <div className="section-header">
+          <h3 className="section-title">Meet the Alchemi Agent Network</h3>
+          <p className="section-subtitle">
+            Five specialized autonomous agents coordinate in the background to handle the planning, scheduling, and risk assessment.
+          </p>
+        </div>
+
+        <div className="agents-chain">
+          <div className="agent-node">
+            <div className="agent-node-icon" style={{ borderColor: '#3b82f6' }}>🧠</div>
+            <span className="agent-node-name">Planner Agent</span>
+          </div>
+          <div className="agent-node">
+            <div className="agent-node-icon" style={{ borderColor: '#f59e0b' }}>🔥</div>
+            <span className="agent-node-name">Prioritizer Agent</span>
+          </div>
+          <div className="agent-node">
+            <div className="agent-node-icon" style={{ borderColor: '#ef4444' }}>⚠</div>
+            <span className="agent-node-name">Risk Predictor</span>
+          </div>
+          <div className="agent-node">
+            <div className="agent-node-icon" style={{ borderColor: '#10b981' }}>💡</div>
+            <span className="agent-node-name">Coach Agent</span>
+          </div>
+          <div className="agent-node">
+            <div className="agent-node-icon" style={{ borderColor: '#a855f7' }}>📊</div>
+            <span className="agent-node-name">Reflection Agent</span>
+          </div>
+        </div>
+      </section>
+
+      {/* See It in Action Demo Section */}
+      <section id="demo" className="landing-section relative z-20">
+        <div className="section-header">
+          <h3 className="section-title">See It in Action</h3>
+          <p className="section-subtitle">
+            Watch how a high-urgency goal is processed from input to completion.
+          </p>
+        </div>
+
+        <div className="demo-flow-wrapper">
+          <div className="demo-step">
+            <div className="demo-step-label">1. Goal Input</div>
+            <div className="demo-step-value" style={{ color: '#c084fc' }}>React Assignment</div>
+          </div>
+          <div className="demo-connector"><ArrowRight className="w-5 h-5" /></div>
+
+          <div className="demo-step" style={{ borderColor: 'rgba(236, 72, 153, 0.3)' }}>
+            <div className="demo-step-label">2. AI Risk Score</div>
+            <div className="demo-step-value" style={{ color: '#ec4899' }}>82% Risk</div>
+          </div>
+          <div className="demo-connector"><ArrowRight className="w-5 h-5" /></div>
+
+          <div className="demo-step">
+            <div className="demo-step-label">3. Deconstruct</div>
+            <div className="demo-step-value">6 Subtasks</div>
+          </div>
+          <div className="demo-connector"><ArrowRight className="w-5 h-5" /></div>
+
+          <div className="demo-step" style={{ borderColor: 'rgba(6, 182, 212, 0.3)' }}>
+            <div className="demo-step-label">4. Auto-Schedule</div>
+            <div className="demo-step-value" style={{ color: '#22d3ee' }}>Today 6:00 PM</div>
+          </div>
+          <div className="demo-connector"><ArrowRight className="w-5 h-5" /></div>
+
+          <div className="demo-step">
+            <div className="demo-step-label">5. Focus Mode</div>
+            <div className="demo-step-value">Ambient Noise</div>
+          </div>
+          <div className="demo-connector"><ArrowRight className="w-5 h-5" /></div>
+
+          <div className="demo-step" style={{ borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+            <div className="demo-step-label">6. Outcome</div>
+            <div className="demo-step-value" style={{ color: '#10b981' }}>Completed 🎉</div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="footer-container relative z-20">
         <div className="footer-logo">
@@ -188,9 +374,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             </defs>
           </svg>
         </div>
+        
+        <div className="footer-links">
+          <a href="https://github.com/shravani-n-10/Alchemi." target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
+          <a href="#features" className="footer-link">Features</a>
+          <a href="#how-it-works" className="footer-link">How It Works</a>
+          <a href="#why-alchemi" className="footer-link">Why Us</a>
+          <a href="#agents" className="footer-link">AI Agents</a>
+        </div>
+
         <p>© 2026 Alchemi Productivity Inc. All Rights Reserved.</p>
-        <p>Developed for the Coding Ninjas 10x Vibe2Ship Hackathon</p>
-        <p>Powered by Google AI Studio</p>
+        <p>Developed for the Coding Ninjas 10x Vibe2Ship Hackathon. Powered by Google AI Studio.</p>
       </footer>
     </div>
   );

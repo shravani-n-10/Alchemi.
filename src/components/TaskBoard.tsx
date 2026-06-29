@@ -25,6 +25,7 @@ export const TaskBoard: React.FC = () => {
   const [effort, setEffort] = useState('1');
   const [category, setCategory] = useState<'Work' | 'Study' | 'Personal' | 'Finance' | 'Urgent'>('Work');
   const [isCreating, setIsCreating] = useState(false);
+  const [selectedWhyTask, setSelectedWhyTask] = useState<any | null>(null);
 
   const activeTasks = tasks.filter((t) => !t.completed);
 
@@ -297,6 +298,15 @@ export const TaskBoard: React.FC = () => {
                       {task.panicIndex}%
                     </span>
                     <span className="text-[9px] text-text-muted uppercase font-semibold">Panic</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedWhyTask(task);
+                      }}
+                      className="priority-why-btn"
+                    >
+                      Why?
+                    </button>
                   </div>
                 </div>
 
@@ -316,6 +326,47 @@ export const TaskBoard: React.FC = () => {
           })
         )}
       </div>
+
+      {selectedWhyTask && (
+        <div className="why-tooltip-overlay" onClick={() => setSelectedWhyTask(null)}>
+          <div className="why-tooltip-card" onClick={(e) => e.stopPropagation()}>
+            <h4 className="why-tooltip-title">
+              <span className="text-violet-400">🔥</span> Why is this my priority?
+            </h4>
+            <div className="mb-4">
+              <span className="text-xs font-bold text-text-primary block mb-1">{selectedWhyTask.title}</span>
+              <span className="text-[10px] text-text-muted">Panic Index: {selectedWhyTask.panicIndex}%</span>
+            </div>
+            <ul className="why-tooltip-reason-list">
+              <li className="why-tooltip-reason-item">
+                This task is due in <strong>{getCountdown(selectedWhyTask.dueDate)}</strong>.
+              </li>
+              <li className="why-tooltip-reason-item">
+                It requires an estimated <strong>{selectedWhyTask.estimatedHours || 2} hours</strong> of focused work.
+              </li>
+              {selectedWhyTask.panicIndex > 75 && (
+                <li className="why-tooltip-reason-item">
+                  Your Panic Index is in the <strong>Critical Range</strong> due to the short time remaining.
+                </li>
+              )}
+              {selectedWhyTask.silentKiller && (
+                <li className="why-tooltip-reason-item">
+                  It is flagged as a <strong>"Silent Killer"</strong>: a high-effort task that will become impossible to finish if not started now.
+                </li>
+              )}
+              <li className="why-tooltip-reason-item">
+                Energy adaptation: Current energy level is set to <strong>{energyLevel}</strong>, which scales task urgency to protect your calendar.
+              </li>
+            </ul>
+            <button
+              onClick={() => setSelectedWhyTask(null)}
+              className="glass-btn w-full justify-center text-xs py-2 mt-4"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

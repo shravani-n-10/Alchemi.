@@ -46,6 +46,20 @@ const AppContent: React.FC = () => {
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const handleNavClick = (page: 'home' | 'signin' | 'about' | 'guide' | 'dashboard' | 'analytics', anchor?: string) => {
+    setCurrentPage(page);
+    if (anchor) {
+      setTimeout(() => {
+        const element = document.getElementById(anchor);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   // Sync page with login status
   useEffect(() => {
     if (userProfile.isLoggedIn) {
@@ -74,7 +88,7 @@ const AppContent: React.FC = () => {
       {/* Global Glassmorphic Navbar */}
       <header className="navbar">
         {/* Left Side: Brand Logo */}
-        <div className="navbar-logo" onClick={() => setCurrentPage(userProfile.isLoggedIn ? 'dashboard' : 'home')}>
+        <div className="navbar-logo" onClick={() => handleNavClick(userProfile.isLoggedIn ? 'dashboard' : 'home')}>
           <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M9 3H15M10 3V8.462L5.277 17.908C4.55 19.362 5.606 21 7.231 21H16.769C18.394 21 19.45 19.362 18.723 17.908L14 8.462V3" stroke="url(#navFlask)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M7.5 16.5C9.5 14.5 10.5 18.5 12.5 16.5C14.5 14.5 15.5 18.5 16.5 16.5" stroke="url(#navLiquid)" strokeWidth="1.5" strokeLinecap="round"/>
@@ -101,22 +115,28 @@ const AppContent: React.FC = () => {
             {!userProfile.isLoggedIn ? (
               <>
                 <button 
-                  onClick={() => setCurrentPage('home')} 
+                  onClick={() => handleNavClick('home')} 
                   className={`nav-link ${currentPage === 'home' ? 'active' : ''}`}
                 >
                   Home
                 </button>
                 <button 
-                  onClick={() => setCurrentPage('about')} 
-                  className={`nav-link ${currentPage === 'about' ? 'active' : ''}`}
+                  onClick={() => handleNavClick('home', 'features')} 
+                  className="nav-link"
                 >
-                  About Us
+                  Features
                 </button>
                 <button 
-                  onClick={() => setCurrentPage('guide')} 
+                  onClick={() => handleNavClick('home', 'how-it-works')} 
+                  className="nav-link"
+                >
+                  How It Works
+                </button>
+                <button 
+                  onClick={() => handleNavClick('guide')} 
                   className={`nav-link ${currentPage === 'guide' ? 'active' : ''}`}
                 >
-                  Guide / Info
+                  Guide
                 </button>
               </>
             ) : (
@@ -162,7 +182,7 @@ const AppContent: React.FC = () => {
 
             {!userProfile.isLoggedIn ? (
               <button
-                onClick={() => setCurrentPage('signin')}
+                onClick={() => handleNavClick('signin')}
                 className={`glass-btn text-xs py-1.5 px-4 border border-violet-500/20 hover:border-violet-500/40 text-violet-300 flex items-center gap-1.5 ${currentPage === 'signin' ? 'bg-white/10 border-violet-400' : ''}`}
               >
                 <LogIn className="w-3.5 h-3.5" /> Sign In
