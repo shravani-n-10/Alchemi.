@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAI } from '../context/AIContext';
 import { useTasks } from '../context/TaskContext';
-import audioSynth from '../services/audio';
-import { Send, Mic, Volume2, Flame, Heart, Headphones, Check } from 'lucide-react';
+import { Send, X } from 'lucide-react';
 
 export const AICoach: React.FC = () => {
   const {
@@ -15,13 +14,9 @@ export const AICoach: React.FC = () => {
     stopSpeaking,
   } = useAI();
 
-  const { habits, toggleHabit, settings, updateSettings } = useTasks();
-
+  const { settings } = useTasks();
   const [inputText, setInputText] = useState('');
-  const [rainOn, setRainOn] = useState(false);
-  const [noiseOn, setNoiseOn] = useState(false);
-  const [rainVolume, setRainVolume] = useState(settings.soundVolume);
-  const [noiseVolume, setNoiseVolume] = useState(settings.soundVolume);
+  const [isOpen, setIsOpen] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -43,228 +38,123 @@ export const AICoach: React.FC = () => {
     await sendMessage('Give me a pep talk');
   };
 
-  // Soundboard toggles
-  const handleToggleRain = () => {
-    if (rainOn) {
-      audioSynth.stopRain();
-    } else {
-      audioSynth.startRain(rainVolume);
-    }
-    setRainOn(!rainOn);
-  };
-
-  const handleToggleNoise = () => {
-    if (noiseOn) {
-      audioSynth.stopBrownNoise();
-    } else {
-      audioSynth.startBrownNoise(noiseVolume);
-    }
-    setNoiseOn(!noiseOn);
-  };
-
-  const handleRainVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const vol = parseFloat(e.target.value);
-    setRainVolume(vol);
-    if (rainOn) {
-      audioSynth.setRainVolume(vol);
-    }
-    updateSettings({ soundVolume: vol });
-  };
-
-  const handleNoiseVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const vol = parseFloat(e.target.value);
-    setNoiseVolume(vol);
-    if (noiseOn) {
-      audioSynth.setBrownNoiseVolume(vol);
-    }
-  };
+  if (!isOpen) {
+    return (
+      <div 
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 z-50 glass-panel p-3.5 flex items-center gap-3.5 border-violet-500/20 shadow-2xl bg-slate-950/95 cursor-pointer hover:border-violet-500/45 hover:shadow-violet-500/10 transition-all animate-fadeIn select-none"
+      >
+        <div className="w-8 h-8 rounded-full bg-violet-500/10 flex items-center justify-center text-sm relative">
+          🤖
+          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-pink-500 animate-ping"></span>
+        </div>
+        <div className="text-left pr-2">
+          <span className="text-[11px] font-bold text-white block">Alchem-AI Coach</span>
+          <span className="text-[9px] text-text-secondary">Need help planning today?</span>
+        </div>
+        <span className="text-[10px] text-violet-400 font-bold ml-auto bg-violet-500/10 px-2 py-0.5 rounded">Open</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col h-full gap-4">
+    <div className="fixed bottom-6 right-6 z-50 w-[360px] h-[480px] glass-panel border-violet-500/35 shadow-2xl bg-slate-950/95 flex flex-col overflow-hidden animate-fadeIn p-4">
+      {/* Header */}
+      <div className="flex justify-between items-center pb-2.5 border-b border-white/5 mb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-violet-500/10 flex items-center justify-center text-xs">🤖</div>
+          <span className="text-xs font-bold text-white">Alchem-AI Coach</span>
+        </div>
+        <button 
+          onClick={() => setIsOpen(false)} 
+          className="text-text-muted hover:text-white transition-colors text-xs bg-none border-none cursor-pointer outline-none"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
       {/* AI Pulse Core */}
-      <div className="glass-panel p-4 flex flex-col items-center justify-center text-center relative overflow-hidden">
+      <div className="bg-white/2 border border-white/5 rounded-xl p-3 flex items-center gap-3 mb-3 shrink-0">
         <div
           onClick={triggerVoiceAssistant}
-          className={`ai-core-orb mb-3 ${
+          className={`ai-core-orb shrink-0 cursor-pointer ${
             isListening ? 'listening' : isSpeaking ? 'pulsing' : ''
           }`}
+          style={{ width: '32px', height: '32px' }}
         ></div>
-        <span className="text-xs font-bold text-text-primary heading-outfit">
-          {isListening ? 'Listening to you...' : isSpeaking ? 'Alchem-AI Speaking' : 'Tap Orb to Speak'}
-        </span>
-        <span className="text-[10px] text-text-secondary mt-1">
-          {isListening
-            ? 'Speak your command now...'
-            : isSpeaking
-            ? 'Click to silence coach.'
-            : 'Ask: "Give me a pep talk"'}
-        </span>
+        <div className="text-left flex-1 min-w-0">
+          <span className="text-[10px] font-bold text-white block">
+            {isListening ? 'Listening...' : isSpeaking ? 'Speaking...' : 'Voice Assistant'}
+          </span>
+          <span className="text-[9px] text-text-secondary block truncate">
+            {isListening ? 'Speak now...' : isSpeaking ? 'Click to mute' : 'Tap orb to talk'}
+          </span>
+        </div>
         {isSpeaking && (
           <button
             onClick={stopSpeaking}
-            className="text-[9px] text-violet-400 border border-violet-500/20 px-2 py-0.5 rounded mt-2 hover:bg-violet-950/20 transition-all"
+            className="text-[8px] text-violet-400 border border-violet-500/20 px-1.5 py-0.5 rounded hover:bg-violet-950/20 transition-all shrink-0"
           >
-            Mute Voice
+            Mute
           </button>
         )}
       </div>
 
-      {/* Ambient Soundboard */}
-      <div className="glass-panel p-4 space-y-3">
-        <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold flex items-center gap-1">
-          <Headphones className="w-3.5 h-3.5 text-cyan-400" /> Focus Soundscapes
-        </span>
-        <div className="space-y-2.5">
-          {/* Rain */}
-          <div className="flex items-center justify-between gap-3">
-            <button
-              onClick={handleToggleRain}
-              className={`py-1 px-3 rounded text-xs font-semibold border transition-all shrink-0 ${
-                rainOn
-                  ? 'bg-cyan-950/20 border-cyan-500 text-cyan-300'
-                  : 'border-slate-800 text-text-secondary hover:border-slate-700'
-              }`}
-            >
-              Rain
-            </button>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.05"
-              disabled={!rainOn}
-              value={rainVolume}
-              onChange={handleRainVolumeChange}
-              className="flex-1 accent-cyan-500 h-1 bg-slate-800 rounded appearance-none cursor-pointer disabled:opacity-30"
-            />
-          </div>
-
-          {/* Brown Noise */}
-          <div className="flex items-center justify-between gap-3">
-            <button
-              onClick={handleToggleNoise}
-              className={`py-1 px-3 rounded text-xs font-semibold border transition-all shrink-0 ${
-                noiseOn
-                  ? 'bg-violet-950/20 border-violet-500 text-violet-300'
-                  : 'border-slate-800 text-text-secondary hover:border-slate-700'
-              }`}
-            >
-              Brown Noise
-            </button>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.05"
-              disabled={!noiseOn}
-              value={noiseVolume}
-              onChange={handleNoiseVolumeChange}
-              className="flex-1 accent-violet-500 h-1 bg-slate-800 rounded appearance-none cursor-pointer disabled:opacity-30"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Alchem-AI Chat */}
-      <div className="glass-panel p-4 flex-1 flex flex-col overflow-hidden">
-        <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold mb-2 flex items-center gap-1">
-          <Heart className="w-3.5 h-3.5 text-pink-400" /> AI Coaching Chat
-        </span>
-
-        {/* Chat History */}
-        <div className="flex-1 overflow-y-auto space-y-3 mb-3 pr-1 text-xs">
-          {chatHistory.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex flex-col max-w-[85%] ${
-                msg.sender === 'user' ? 'ml-auto items-end' : 'mr-auto items-start'
-              }`}
-            >
-              <div
-                className={`p-2.5 rounded-xl leading-normal ${
-                  msg.sender === 'user'
-                    ? 'bg-violet-950/45 border border-violet-900/40 text-text-primary rounded-br-none'
-                    : 'bg-white/5 border border-white/5 text-text-secondary rounded-bl-none'
-                }`}
-              >
-                {msg.text}
-              </div>
-              <span className="text-[9px] text-text-muted mt-1">{msg.timestamp}</span>
-            </div>
-          ))}
-          <div ref={chatEndRef}></div>
-        </div>
-
-        {/* Chat Input */}
-        <form onSubmit={handleSend} className="flex gap-2 relative">
-          <input
-            type="text"
-            placeholder="Ask Alchem-AI..."
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            disabled={isProcessing}
-            className="flex-1 glass-input text-xs py-2 pr-8"
-          />
-          <button
-            type="submit"
-            disabled={isProcessing}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary hover:text-white disabled:opacity-40"
+      {/* Chat History */}
+      <div className="flex-1 overflow-y-auto space-y-3 mb-3 pr-1 text-xs">
+        {chatHistory.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex flex-col max-w-[85%] ${
+              msg.sender === 'user' ? 'ml-auto items-end' : 'mr-auto items-start'
+            }`}
           >
-            <Send className="w-4 h-4" />
-          </button>
-        </form>
+            <div
+              className={`p-2.5 rounded-xl leading-normal ${
+                msg.sender === 'user'
+                  ? 'bg-violet-950/45 border border-violet-900/40 text-text-primary rounded-br-none'
+                  : 'bg-white/5 border border-white/5 text-text-secondary rounded-bl-none'
+              }`}
+            >
+              {msg.text}
+            </div>
+            <span className="text-[8px] text-text-muted mt-1">{msg.timestamp}</span>
+          </div>
+        ))}
+        <div ref={chatEndRef}></div>
+      </div>
 
-        <button
-          onClick={triggerPepTalk}
+      {/* Chat Input */}
+      <form onSubmit={handleSend} className="flex gap-2 relative shrink-0">
+        <input
+          type="text"
+          placeholder="Ask Alchem-AI..."
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
           disabled={isProcessing}
-          className="glass-btn text-[10px] py-1.5 justify-center border border-pink-500/20 hover:border-pink-500/40 text-pink-300 mt-2"
+          className="flex-1 glass-input text-xs py-2.5 pr-8"
+        />
+        <button
+          type="submit"
+          disabled={isProcessing}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary hover:text-white disabled:opacity-40"
         >
-          Request Pep Talk
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
         </button>
-      </div>
+      </form>
 
-      {/* Habit Tracker */}
-      <div className="glass-panel p-4">
-        <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold mb-3 flex items-center gap-1">
-          <Flame className="w-3.5 h-3.5 text-red-400" /> Momentum Habits
-        </span>
-        <div className="space-y-2">
-          {habits.map((habit) => {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const isCompletedToday = habit.lastCompleted === todayStr;
-
-            return (
-              <div
-                key={habit.id}
-                onClick={() => toggleHabit(habit.id)}
-                className="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 cursor-pointer transition-all text-xs"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                      isCompletedToday
-                        ? 'bg-green-500/20 border-green-500 text-green-400'
-                        : 'border-slate-700 bg-slate-950'
-                    }`}
-                  >
-                    {isCompletedToday && <Check className="w-3 h-3" />}
-                  </div>
-                  <span className={isCompletedToday ? 'line-through text-text-muted' : 'text-text-primary'}>
-                    {habit.title}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1 bg-slate-950 px-2 py-0.5 rounded border border-white/5">
-                  <Flame className="w-3 h-3 text-orange-400" />
-                  <span className="text-[10px] font-mono text-text-secondary font-semibold">
-                    {habit.streak}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <button
+        onClick={triggerPepTalk}
+        disabled={isProcessing}
+        className="glass-btn text-[9px] py-1.5 justify-center border border-pink-500/25 hover:border-pink-500/45 text-pink-300 mt-2 shrink-0"
+      >
+        Request Pep Talk
+      </button>
     </div>
   );
 };
+
 export default AICoach;

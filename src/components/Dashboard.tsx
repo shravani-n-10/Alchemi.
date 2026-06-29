@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTasks } from '../context/TaskContext';
 import { useAI } from '../context/AIContext';
 import TaskBoard from './TaskBoard';
 import AIPlanner from './AIPlanner';
 import AICoach from './AICoach';
 import FocusMode from './FocusMode';
-import { AlertOctagon } from 'lucide-react';
+import { AlertOctagon, Sparkles, Calendar, Plus, Flame, Clock, Zap } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const {
@@ -14,12 +14,29 @@ export const Dashboard: React.FC = () => {
     setDailyPlan,
     dailyPlan,
     activeSession,
+    userProfile,
+    syncGoogleCalendar,
+    googleCalendarSynced,
+    addTask,
+    habits,
+    toggleHabit,
   } = useTasks();
 
   const {
     riskAssessment,
     dismissRiskAssessment,
+    getTaskBreakdown,
+    generateBriefing,
   } = useAI();
+
+  // Onboarding task creation modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [title, setTitle] = useState('');
+  const [desc, setDesc] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [effort, setEffort] = useState('2');
+  const [category, setCategory] = useState<'Work' | 'Study' | 'Personal' | 'Finance' | 'Urgent'>('Work');
+  const [isCreating, setIsCreating] = useState(false);
 
   const handleExecuteRecovery = (type: 'de-scope' | 'reschedule') => {
     if (!riskAssessment) return;
@@ -47,27 +64,320 @@ export const Dashboard: React.FC = () => {
     dismissRiskAssessment();
   };
 
-  return (
-    <div className="flex-1 flex flex-col overflow-hidden h-[calc(100vh-70px)] bg-transparent text-text-primary relative z-10">
-      {/* Main Workspace Grid */}
-      <main className="flex-1 p-6 overflow-hidden">
-        <div className="dashboard-grid">
-          {/* Column 1: Task Board */}
-          <section className="h-full overflow-hidden">
-            <TaskBoard />
-          </section>
+  const handleCreateFirstTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !dueDate || isCreating) return;
 
-          {/* Column 2: AI Planner & Timeline */}
-          <section className="h-full overflow-hidden">
-            <AIPlanner />
-          </section>
+    setIsCreating(true);
+    try {
+      const createdTask = await addTask({
+        title: title.trim(),
+        description: desc.trim(),
+        category,
+        dueDate: new Date(dueDate).toISOString(),
+        estimatedEffort: parseFloat(effort) || 2,
+        energyLevel: 'medium',
+      });
 
-          {/* Column 3: AI Coach & Soundboard */}
-          <section className="h-full overflow-hidden">
-            <AICoach />
-          </section>
+      // Trigger task breakdown in background
+      const breakdown = await getTaskBreakdown(createdTask.title, createdTask.description, createdTask.category);
+      updateTask(createdTask.id, {
+        subtasks: breakdown.subtasks.map((sub: any, idx: number) => ({
+          id: `sub-${idx}-${Date.now()}`,
+          title: sub.title,
+          duration: sub.duration,
+          completed: false,
+        })),
+        procrastinationWarning: breakdown.procrastinationWarning,
+        starterAsset: breakdown.starterAsset,
+      });
+
+      // Reset fields
+      setTitle('');
+      setDesc('');
+      setDueDate('');
+      setEffort('2');
+      setCategory('Work');
+      setShowAddModal(false);
+      
+      // Auto-trigger daily plan generation to instantly build their first day
+      setTimeout(() => {
+        generateBriefing();
+      }, 500);
+    } catch (err) {
+      console.error('Failed to create onboarding task:', err);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const activeTasks = tasks.filter((t) => !t.completed);
+  const totalEffort = activeTasks.reduce((sum, t) => sum + t.estimatedEffort, 0);
+  const highestTask = [...activeTasks].sort((a, b) => b.panicIndex - a.panicIndex)[0];
+  const riskLevel = riskAssessment?.riskLevel || (highestTask?.panicIndex > 75 ? 'HIGH' : highestTask?.panicIndex > 40 ? 'MEDIUM' : 'LOW');
+
+  // 1. FIRST-TIME USER ONBOARDING VIEW
+  if (tasks.length === 0) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-4xl mx-auto space-y-8 animate-fadeIn h-[calc(100vh-70px)] overflow-y-auto relative z-10">
+        <div className="space-y-3">
+          <h2 className="text-[40px] font-black heading-outfit text-white leading-tight">
+            👋 Welcome, {userProfile.name || 'Alchemist'}
+          </h2>
+          <p className="text-[20px] text-text-secondary max-w-xl mx-auto leading-normal">
+            Your AI Productivity Companion is ready. Let's build today's plan.
+          </p>
         </div>
-      </main>
+
+        <div className="flex items-center gap-4 justify-center">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="glass-btn glass-btn-primary py-3.5 px-8 text-sm font-bold"
+          >
+            ➕ Create Your First Task
+          </button>
+          {!googleCalendarSynced ? (
+            <button
+              onClick={syncGoogleCalendar}
+              className="glass-btn py-3.5 px-8 text-sm border-white/8 hover:border-white/15"
+            >
+              📅 Import Google Calendar
+            </button>
+          ) : (
+            <span className="glass-btn py-3.5 px-8 text-sm border-green-500/20 text-green-300 bg-green-950/5">
+              🟢 Calendar Imported (3 events)
+            </span>
+          )}
+        </div>
+
+        {/* First Time User Card */}
+        <div className="glass-panel p-8 max-w-lg w-full border-violet-500/10 shadow-2xl text-left space-y-6">
+          <h3 className="text-[22px] font-extrabold heading-outfit text-white">Welcome to Alchemi</h3>
+          
+          <div className="space-y-4">
+            <div className="flex gap-4 items-start">
+              <span className="w-6 h-6 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
+              <div>
+                <h4 className="text-sm font-bold text-white">Create your first task</h4>
+                <p className="text-xs text-text-secondary mt-0.5">Tell Alchemi what you need to achieve and when it's due.</p>
+              </div>
+            </div>
+            <div className="flex gap-4 items-start">
+              <span className="w-6 h-6 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
+              <div>
+                <h4 className="text-sm font-bold text-white">AI calculates Panic Index</h4>
+                <p className="text-xs text-text-secondary mt-0.5">Our agents compute your deadline risk based on energy and effort.</p>
+              </div>
+            </div>
+            <div className="flex gap-4 items-start">
+              <span className="w-6 h-6 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
+              <div>
+                <h4 className="text-sm font-bold text-white">AI builds your schedule</h4>
+                <p className="text-xs text-text-secondary mt-0.5">Alchemi fits study blocks around your meetings and classes.</p>
+              </div>
+            </div>
+            <div className="flex gap-4 items-start">
+              <span className="w-6 h-6 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</span>
+              <div>
+                <h4 className="text-sm font-bold text-white">Focus Mode begins</h4>
+                <p className="text-xs text-text-secondary mt-0.5">Start work with ambient soundscapes and get starter assets.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Task Creation Modal */}
+        {showAddModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50">
+            <div className="glass-panel max-w-md w-full p-6 relative text-left">
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="absolute top-4 right-4 text-text-secondary hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+              <h3 className="text-base font-bold heading-outfit mb-4 text-text-primary">
+                Create Your First Task
+              </h3>
+              <form onSubmit={handleCreateFirstTask} className="space-y-4">
+                <div>
+                  <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Task Title</span>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g., Finish React Lab Record"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full glass-input text-xs py-2"
+                  />
+                </div>
+                <div>
+                  <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Description</span>
+                  <textarea
+                    placeholder="e.g., Code the state-based router and test on GH Pages"
+                    value={desc}
+                    onChange={(e) => setDesc(e.target.value)}
+                    className="w-full glass-input text-xs py-2 h-20 resize-none"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Category</span>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value as any)}
+                      className="w-full glass-input text-xs py-2.5"
+                    >
+                      <option value="Work">Work</option>
+                      <option value="Study">Study</option>
+                      <option value="Personal">Personal</option>
+                      <option value="Finance">Finance</option>
+                      <option value="Urgent">Urgent</option>
+                    </select>
+                  </div>
+                  <div>
+                    <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Estimated Hours</span>
+                    <input
+                      type="number"
+                      min="0.5"
+                      max="12"
+                      step="0.5"
+                      required
+                      value={effort}
+                      onChange={(e) => setEffort(e.target.value)}
+                      className="w-full glass-input text-xs py-2"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Due Date & Time</span>
+                  <input
+                    type="datetime-local"
+                    required
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className="w-full glass-input text-xs py-2"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isCreating}
+                  className="w-full glass-btn glass-btn-primary justify-center text-xs py-3 mt-2"
+                >
+                  {isCreating ? 'Creating & Generating AI Plan...' : 'Create Task & Build Schedule'}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // 2. FULL ACTIVE USER DASHBOARD VIEW
+  return (
+    <div className="flex-1 flex flex-col overflow-y-auto h-[calc(100vh-70px)] bg-transparent text-text-primary relative z-10 p-6 space-y-6">
+      
+      {/* Today's AI Briefing (Large Card) */}
+      <div className="glass-panel p-6 border-violet-500/10 relative overflow-hidden animate-fadeIn shrink-0">
+        <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-violet-600/5 rounded-full blur-[50px] pointer-events-none"></div>
+
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="space-y-2">
+            <span className="text-[10px] uppercase font-bold text-violet-400 tracking-wider flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></span> Today's AI Briefing
+            </span>
+            <h3 className="text-[22px] font-extrabold heading-outfit text-white">
+              Ready to conquer your day, {userProfile.name || 'Alchemist'}?
+            </h3>
+            <p className="text-xs text-text-secondary max-w-xl">
+              You have <strong>{activeTasks.length} active tasks</strong> requiring approximately <strong>{totalEffort} hours</strong> of focus today. 
+              {highestTask && (
+                <> Your next recommended action is to start a focus session on <strong>{highestTask.title}</strong>.</>
+              )}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-6 shrink-0 bg-white/2 border border-white/5 p-4 rounded-xl">
+            <div className="text-center border-r border-white/10 pr-6">
+              <span className="text-[9px] text-text-muted uppercase font-bold block">Risk Level</span>
+              <span className={`text-sm font-black font-mono block mt-1 ${riskLevel === 'HIGH' ? 'text-red-400' : riskLevel === 'MEDIUM' ? 'text-amber-400' : 'text-green-400'}`}>
+                {riskLevel}
+              </span>
+            </div>
+            {highestTask && (
+              <div className="text-center border-r border-white/10 pr-6">
+                <span className="text-[9px] text-text-muted uppercase font-bold block">Highest Panic</span>
+                <span className="text-sm font-black font-mono block mt-1 text-pink-400">
+                  {highestTask.panicIndex}%
+                </span>
+              </div>
+            )}
+            <div className="text-center">
+              <span className="text-[9px] text-text-muted uppercase font-bold block">Est. Completion</span>
+              <span className="text-sm font-black font-mono block mt-1 text-cyan-400">
+                {dailyPlan ? dailyPlan.timeline[dailyPlan.timeline.length - 1]?.timeSlot.split(' - ')[1] || '18:00' : '18:00'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 2-Column Workspace Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start flex-1 min-h-0">
+        {/* Column 1: Task Board (Urgency Queue) */}
+        <section className="h-full overflow-hidden min-h-[450px]">
+          <TaskBoard />
+        </section>
+
+        {/* Column 2: AI Planner & Daily Timeline */}
+        <section className="h-full overflow-hidden min-h-[450px]">
+          <AIPlanner />
+        </section>
+      </div>
+
+      {/* Momentum Habits Section (Bottom of page) */}
+      <div className="pt-4 shrink-0">
+        <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-4 px-1 flex items-center gap-1.5">
+          <Flame className="w-4 h-4 text-orange-500" /> Momentum Habits
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {habits.map((habit) => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const isCompletedToday = habit.lastCompleted === todayStr;
+            return (
+              <div
+                key={habit.id}
+                onClick={() => toggleHabit(habit.id)}
+                className={`glass-panel p-4 cursor-pointer flex items-center justify-between border transition-all ${
+                  isCompletedToday 
+                    ? 'border-green-500/20 bg-green-950/5 shadow-md shadow-green-500/5' 
+                    : 'border-white/5 bg-white/2 hover:border-white/10'
+                }`}
+              >
+                <div className="space-y-1">
+                  <h4 className={`text-xs font-bold ${isCompletedToday ? 'text-green-300 line-through' : 'text-white'}`}>
+                    {habit.title}
+                  </h4>
+                  <span className="text-[10px] text-text-secondary">
+                    Streak: <strong>{habit.streak} days</strong>
+                  </span>
+                </div>
+                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                  isCompletedToday 
+                    ? 'border-green-400 bg-green-500/20 text-green-400' 
+                    : 'border-slate-700 text-transparent'
+                }`}>
+                  ✓
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Floating Collapsible AI Coach widget */}
+      <AICoach />
 
       {/* Proactive Risk Triage Modal */}
       {riskAssessment && (
