@@ -1,266 +1,235 @@
-import React, { useState, useEffect } from 'react';
-import { useTasks } from '../context/TaskContext';
-import { useAI } from '../context/AIContext';
-import { getPanicStatus } from '../utils/panic';
-import { Plus, Mic, CheckCircle, Flame, Clock, Zap } from 'lucide-react';
+import React, { useState } from 'react';
+import { Clock, AlertCircle, Sparkles, CheckSquare, Square, Trash2, Tag, Calendar, ChevronRight } from 'lucide-react';
+import { Task } from '../types';
 
 interface TaskBoardProps {
-  onCreateTask: () => void;
+  tasks: Task[];
+  selectedTaskId: string | null;
+  onSelectTask: (task: Task) => void;
+  onToggleComplete: (id: string) => void;
+  onDeleteTask: (id: string) => void;
+  onAddClick: () => void;
 }
 
-export const TaskBoard: React.FC<TaskBoardProps> = ({ onCreateTask }) => {
-  const {
-    tasks,
-    completeTask,
-    energyLevel,
-    setEnergyLevel,
-    activeTaskId,
-    setActiveTaskId,
-  } = useTasks();
+export default function TaskBoard({
+  tasks,
+  selectedTaskId,
+  onSelectTask,
+  onToggleComplete,
+  onDeleteTask,
+  onAddClick
+}: TaskBoardProps) {
+  const [filter, setFilter] = useState<'all' | 'Studies' | 'Work' | 'Personal' | 'Finance'>('all');
+  const [sortBy, setSortBy] = useState<'aiScore' | 'deadline' | 'priority'>('aiScore');
 
-  const { triggerVoiceAssistant, isListening } = useAI();
-  const [selectedWhyTask, setSelectedWhyTask] = useState<any | null>(null);
+  // Categories list
+  const categories = ['all', 'Studies', 'Work', 'Personal', 'Finance'] as const;
 
-  const activeTasks = tasks.filter((t) => !t.completed);
+  // Filter & sort tasks
+  const filteredTasks = tasks
+    .filter(task => filter === 'all' || task.category === filter)
+    .sort((a, b) => {
+      if (sortBy === 'aiScore') {
+        return b.aiScore - a.aiScore; // Higher score first
+      } else if (sortBy === 'deadline') {
+        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime(); // Closest first
+      } else {
+        const priorities = { high: 3, medium: 2, low: 1 };
+        return priorities[b.priority] - priorities[a.priority]; // Highest priority first
+      }
+    });
 
-  // Human-readable countdown timer
-  const getCountdown = (dueDateStr: string) => {
-    const diff = new Date(dueDateStr).getTime() - Date.now();
-    if (diff <= 0) return 'Overdue';
+  // Relative deadline calculator
+  const getDeadlineStatus = (deadlineStr: string, status: 'todo' | 'completed' | 'in_progress') => {
+    if (status === 'completed') return { text: 'Completed', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' };
 
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const deadline = new Date(deadlineStr);
+    const now = new Date();
+    const diffMs = deadline.getTime() - now.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
 
-    if (hours > 24) {
-      const days = Math.floor(hours / 24);
-      return `${days}d ${hours % 24}h remaining`;
+    if (diffMs < 0) {
+      return { text: 'Overdue!', color: 'text-rose-400 bg-rose-500/10 border-rose-500/35 font-extrabold animate-pulse' };
+    } else if (diffHours < 2) {
+      return { text: 'CRITICAL (Under 2h)', color: 'text-rose-400 bg-rose-500/10 border-rose-500/25 font-bold' };
+    } else if (diffHours < 24) {
+      return { text: `Due in ${Math.round(diffHours)} hrs`, color: 'text-orange-400 bg-orange-500/10 border-orange-500/20' };
+    } else {
+      const days = Math.round(diffHours / 24);
+      return { text: `Due in ${days} day${days > 1 ? 's' : ''}`, color: 'text-slate-400 bg-white/5 border-white/5' };
     }
-    return `${hours}h ${mins}m remaining`;
   };
 
-  // State ticker to update countdowns in real-time
-  const [, setTicker] = useState(0);
-  useEffect(() => {
-    const timer = setInterval(() => setTicker((t) => t + 1), 30000);
-    return () => clearInterval(timer);
-  }, []);
+  const getAiScoreBadgeColor = (score: number) => {
+    if (score >= 80) return 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+    if (score >= 50) return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+    return 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20';
+  };
 
   return (
-    <div className="flex flex-col h-full gap-4">
-      {/* Quick Input Bar (Acts as a button shortcut to dedicated Create Task Page) */}
-      <div 
-        onClick={onCreateTask}
-        className="glass-panel p-3 flex items-center gap-2 cursor-pointer hover:border-white/12 transition-all select-none"
-      >
-        <div className="flex-1 text-sm text-text-muted text-left">
-          I want to...
+    <div id="task-board-container" className="flex flex-col gap-5 h-full">
+      {/* Header controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+        {/* Categories filters */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setFilter(cat)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${
+                filter === cat
+                  ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.15)]'
+                  : 'bg-white/5 text-slate-400 border-transparent hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              {cat === 'all' ? 'All Backlog' : cat}
+            </button>
+          ))}
         </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            triggerVoiceAssistant();
-          }}
-          className={`p-2 rounded-lg transition-all ${
-            isListening
-              ? 'bg-cyan-500/20 text-cyan-400 animate-pulse'
-              : 'hover:bg-white/5 text-text-secondary hover:text-white'
-          }`}
-          title="Voice Command (Speak to Alchemi)"
-        >
-          <Mic className="w-4 h-4" />
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onCreateTask();
-          }}
-          className="p-2 rounded-lg hover:bg-white/5 text-text-secondary hover:text-white"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
-      </div>
 
-      {/* Energy Level Selector */}
-      <div className="glass-panel p-3">
-        <span className="text-[10px] text-text-secondary uppercase tracking-wider block mb-2 font-semibold flex items-center gap-1">
-          <Zap className="w-3.5 h-3.5 text-yellow-400" /> State of Energy
-        </span>
-        <div className="grid grid-cols-3 gap-2">
-          {(['low', 'medium', 'high'] as const).map((level) => {
-            const isActive = energyLevel === level;
-            
-            let activeClass = '';
-            let hoverClass = '';
-            
-            if (level === 'low') {
-              activeClass = 'bg-green-950/35 border-green-500 text-green-300 shadow-md shadow-green-500/10';
-              hoverClass = 'hover:border-green-500/55 hover:text-green-300';
-            } else if (level === 'medium') {
-              activeClass = 'bg-amber-950/35 border-amber-500 text-amber-300 shadow-md shadow-amber-500/10';
-              hoverClass = 'hover:border-amber-500/55 hover:text-amber-300';
-            } else {
-              activeClass = 'bg-violet-950/35 border-violet-500 text-violet-300 shadow-md shadow-violet-500/10';
-              hoverClass = 'hover:border-violet-500/55 hover:text-violet-300';
-            }
+        {/* Sort selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-400 font-semibold">Sort:</span>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="text-xs font-semibold text-white bg-white/5 border border-white/10 rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+          >
+            <option value="aiScore">🔮 AI Urgency Score</option>
+            <option value="deadline">⏰ Closest Deadline</option>
+            <option value="priority">🔥 High Priority</option>
+          </select>
 
-            return (
-              <button
-                key={level}
-                onClick={() => setEnergyLevel(level)}
-                className={`py-1.5 px-3 rounded-lg text-xs font-semibold capitalize border transition-all ${
-                  isActive ? activeClass : `bg-transparent border-slate-805/65 text-text-secondary ${hoverClass}`
-                }`}
-              >
-                {level}
-              </button>
-            );
-          })}
+          <button
+            onClick={onAddClick}
+            className="text-xs font-bold text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-95 px-3.5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 transition flex items-center gap-1 cursor-pointer ml-1"
+          >
+            + Add Task
+          </button>
         </div>
       </div>
 
-      {/* Tasks List */}
-      <div className="flex-1 overflow-y-auto pr-1 space-y-3">
-        <div className="flex justify-between items-center px-1">
-          <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-            Urgency Queue ({activeTasks.length})
-          </span>
-          {activeTasks.some((t) => t.silentKiller) && (
-            <span className="text-[10px] bg-red-950/40 text-red-400 border border-red-900/40 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1 animate-pulse">
-              <Flame className="w-3 h-3" /> Silent Killers Detected
-            </span>
-          )}
-        </div>
-
-        {activeTasks.length === 0 ? (
-          <div className="text-center py-12 glass-panel cursor-pointer hover:border-white/8 transition-all" onClick={onCreateTask}>
-            <p className="text-xs text-text-muted">No active tasks. Click here to add one!</p>
+      {/* Backlog List */}
+      <div className="flex-1 overflow-y-auto max-h-[600px] pr-1 flex flex-col gap-3">
+        {filteredTasks.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
+            <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-3">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <p className="text-sm font-semibold text-white">No active tasks found</p>
+            <p className="text-xs text-slate-400 mt-1 max-w-xs">
+              Add a task or prompt Alchemi to help you organize your day and construct an action timeline!
+            </p>
+            <button
+              onClick={onAddClick}
+              className="mt-4 text-xs font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 px-4 py-2 rounded-xl shadow-sm transition cursor-pointer"
+            >
+              + Create First Task
+            </button>
           </div>
         ) : (
-          activeTasks.map((task) => {
-            const { color, glowClass } = getPanicStatus(task.panicIndex);
+          filteredTasks.map(task => {
+            const isSelected = selectedTaskId === task.id;
+            const deadLineStatus = getDeadlineStatus(task.deadline, task.status);
+            const isCompleted = task.status === 'completed';
+
             return (
               <div
                 key={task.id}
-                onClick={() => setActiveTaskId(task.id)}
-                className={`glass-panel p-4 cursor-pointer relative overflow-hidden ${glowClass} ${
-                  activeTaskId === task.id ? 'border-violet-500 bg-violet-950/5' : ''
+                onClick={() => onSelectTask(task)}
+                className={`group flex items-center justify-between p-4 rounded-2xl border bg-white/5 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer ${
+                  isSelected 
+                    ? 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-500/10' 
+                    : 'border-white/5 hover:border-indigo-500/30 hover:bg-white/10'
                 }`}
               >
-                {/* Visual Category tag */}
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-[10px] bg-white/5 border border-white/5 px-2 py-0.5 rounded text-text-secondary font-medium">
-                    {task.category}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-text-secondary font-mono flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-text-muted" /> {getCountdown(task.dueDate)}
-                    </span>
-                    {task.silentKiller && (
-                      <span className="text-[9px] bg-red-950/50 text-red-400 px-1.5 py-0.2 rounded font-semibold animate-pulse" title="High effort task due in future. Start now.">
-                        SK
-                      </span>
+                {/* Checkbox and Task Info */}
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleComplete(task.id);
+                    }}
+                    className="mt-1 text-slate-400 hover:text-indigo-400 transition flex-shrink-0 cursor-pointer"
+                  >
+                    {isCompleted ? (
+                      <CheckSquare className="w-5 h-5 text-indigo-400 fill-indigo-400/10" />
+                    ) : (
+                      <Square className="w-5 h-5" />
                     )}
+                  </button>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className={`text-sm font-bold truncate leading-tight transition ${
+                        isCompleted ? 'text-slate-500 line-through' : 'text-white group-hover:text-indigo-400'
+                      }`}>
+                        {task.title}
+                      </h3>
+                      {/* Priority Tag */}
+                      <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
+                        task.priority === 'high' 
+                          ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' 
+                          : task.priority === 'medium'
+                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                          : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                      }`}>
+                        {task.priority}
+                      </span>
+                    </div>
+
+                    {/* Metadata summary line */}
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-slate-400">
+                      <span className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                        <Tag className="w-3 h-3 text-indigo-400" />
+                        {task.category}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-slate-400" />
+                        {task.durationMinutes}m
+                      </span>
+                      <span className="flex items-center gap-1 font-mono">
+                        <Calendar className="w-3 h-3 text-slate-400" />
+                        {new Date(task.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <h3 className="text-sm font-semibold text-text-primary mb-1 truncate text-left">
-                  {task.title}
-                </h3>
-                <p className="text-xs text-text-secondary line-clamp-1 mb-3 text-left">
-                  {task.description}
-                </p>
+                {/* Status Badges and Drag Indicator */}
+                <div className="flex items-center gap-3 ml-3 flex-shrink-0">
+                  {/* Deadline warnings */}
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded-lg border flex items-center gap-1 ${deadLineStatus.color}`}>
+                    {task.status !== 'completed' && <Clock className="w-3 h-3" />}
+                    {deadLineStatus.text}
+                  </span>
 
-                {/* Progress bar and Panic Score */}
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex-1 bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${
-                          task.subtasks.length > 0
-                            ? (task.subtasks.filter((s) => s.completed).length / task.subtasks.length) * 100
-                            : 0
-                        }%`,
-                        backgroundColor: color,
-                      }}
-                    ></div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-bold" style={{ color }}>
-                      {task.panicIndex}%
+                  {/* AI Urgency Score Meter */}
+                  {!isCompleted && (
+                    <span className={`text-xs font-black px-2 py-1 rounded-lg border ${getAiScoreBadgeColor(task.aiScore)}`} title="AI computed urgency rating">
+                      🔮 {task.aiScore}
                     </span>
-                    <span className="text-[9px] text-text-muted uppercase font-semibold">Panic</span>
+                  )}
+
+                  {/* Actions (Delete icon) */}
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setSelectedWhyTask(task);
+                        onDeleteTask(task.id);
                       }}
-                      className="priority-why-btn"
+                      className="p-1.5 text-slate-500 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition cursor-pointer md:opacity-0 group-hover:opacity-100"
                     >
-                      Why?
+                      <Trash2 className="w-4 h-4" />
                     </button>
+                    <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-indigo-400 transition group-hover:translate-x-0.5" />
                   </div>
                 </div>
-
-                {/* Action: Mark Complete */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    completeTask(task.id);
-                  }}
-                  className="absolute top-4 right-4 text-text-muted hover:text-green-400 transition-colors opacity-0 hover:opacity-100 focus:opacity-100 transition-opacity"
-                  title="Mark Complete"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                </button>
               </div>
             );
           })
         )}
       </div>
-
-      {selectedWhyTask && (
-        <div className="why-tooltip-overlay" onClick={() => setSelectedWhyTask(null)}>
-          <div className="why-tooltip-card" onClick={(e) => e.stopPropagation()}>
-            <h4 className="why-tooltip-title">
-              <span className="text-violet-400">🔥</span> Why is this my priority?
-            </h4>
-            <div className="mb-4">
-              <span className="text-xs font-bold text-text-primary block mb-1 text-left">{selectedWhyTask.title}</span>
-              <span className="text-[10px] text-text-muted">Panic Index: {selectedWhyTask.panicIndex}%</span>
-            </div>
-            <ul className="why-tooltip-reason-list">
-              <li className="why-tooltip-reason-item">
-                This task is due in <strong>{getCountdown(selectedWhyTask.dueDate)}</strong>.
-              </li>
-              <li className="why-tooltip-reason-item">
-                It requires an estimated <strong>{selectedWhyTask.estimatedHours || 2} hours</strong> of focused work.
-              </li>
-              {selectedWhyTask.panicIndex > 75 && (
-                <li className="why-tooltip-reason-item">
-                  Your Panic Index is in the <strong>Critical Range</strong> due to the short time remaining.
-                </li>
-              )}
-              {selectedWhyTask.silentKiller && (
-                <li className="why-tooltip-reason-item">
-                  It is flagged as a <strong>"Silent Killer"</strong>: a high-effort task that will become impossible to finish if not started now.
-                </li>
-              )}
-              <li className="why-tooltip-reason-item">
-                Energy adaptation: Current energy level is set to <strong>{energyLevel}</strong>, which scales task urgency to protect your calendar.
-              </li>
-            </ul>
-            <button
-              onClick={() => setSelectedWhyTask(null)}
-              className="glass-btn w-full justify-center text-xs py-2 mt-4"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
-};
-
-export default TaskBoard;
+}

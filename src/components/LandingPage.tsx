@@ -1,393 +1,278 @@
 import React from 'react';
-import { Sparkles, Calendar, Compass, Layers, Zap, ShieldAlert, ArrowRight, HelpCircle } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Sparkles, LayoutDashboard, Calendar, Zap, Bot, Shield, ArrowRight, CheckCircle, Brain, Target, Star, Trophy, Users } from 'lucide-react';
+import { Task, Habit } from '../types';
 
 interface LandingPageProps {
-  onStart: () => void;
+  tasks: Task[];
+  habits: Habit[];
+  onNavigate: (page: 'home' | 'login' | 'workspace' | 'insights') => void;
+  isLoggedIn: boolean;
+  user: { name: string; email: string; avatarUrl?: string } | null;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
+export default function LandingPage({ tasks, habits, onNavigate, isLoggedIn, user }: LandingPageProps) {
+  const activeTasksCount = tasks.filter(t => t.status !== 'completed').length;
+  const habitsCount = habits.length;
+  const completedToday = tasks.filter(t => t.status === 'completed').length;
+
   return (
-    <div className="flex flex-col justify-between relative overflow-hidden text-text-primary">
-      {/* Background blobs */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-pink-500/5 rounded-full blur-[100px] pointer-events-none"></div>
-
+    <div id="landing-page" className="flex flex-col gap-16 relative z-10 py-8">
       {/* Hero Section */}
-      <main className="hero-container relative z-20">
-        <div className="hero-badge">
-          <Sparkles className="w-3.5 h-3.5" /> Introducing Alchemi 1.0 — Proactive Multi-Agent OS
-        </div>
+      <section className="text-center max-w-4xl mx-auto flex flex-col items-center gap-6 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#a855f7]/5 border border-[#a855f7]/30 rounded-full text-xs font-semibold mb-2 shadow-[0_0_15px_rgba(168,85,247,0.05)]"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-[#c084fc]" />
+          <span className="text-[#c084fc] font-bold">Introducing Alchemi 1.0</span>
+          <span className="text-slate-400 font-medium">— Proactive Multi-Agent OS</span>
+        </motion.div>
 
-        <h2 className="hero-title">
-          Conquer Your Deadlines <br />
-          <span className="gradient">Before the Panic Sets In.</span>
-        </h2>
+        <motion.h1
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.7 }}
+          className="text-4xl md:text-6xl font-black tracking-tight leading-none text-white font-display"
+        >
+          Conquer Procrastination. <br />
+          <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 bg-clip-text text-transparent">
+            Master Every Deadline.
+          </span>
+        </motion.h1>
 
-        <div className="hero-divider">── ✦ ──</div>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="text-slate-400 text-base md:text-lg max-w-2xl leading-relaxed"
+        >
+          Alchemi is an autonomous AI productivity companion that designs personalized workflow structures, organizes daily hours, and provides proactive chat coaching to keep you in focus flow state.
+        </motion.p>
 
-        <p className="hero-description">
-          <strong>Meet Alchemi — Your AI Productivity Companion</strong><br />
-          Plans your day, predicts deadline risks, breaks work into actionable steps, and helps you finish before it's too late. It calculates your urgency using a dynamic <span className="text-pink">Panic Index</span> and generates <span className="text-cyan">AI Starter Drafts</span> so you can begin working immediately.
-        </p>
-
-        <div className="hero-buttons">
+        {/* CTA Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="flex flex-col sm:flex-row gap-4 mt-4 w-full sm:w-auto"
+        >
           <button
-            onClick={onStart}
-            className="glass-btn glass-btn-primary py-3.5 px-8"
+            onClick={() => onNavigate(isLoggedIn ? 'workspace' : 'login')}
+            className="px-8 py-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-2xl text-sm font-bold shadow-lg shadow-indigo-500/25 hover:opacity-95 transition cursor-pointer flex items-center justify-center gap-2 group border border-white/10"
           >
-            Get Started Free <Sparkles className="w-4 h-4" />
+            Launch Alchemi Workspace
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
           </button>
-          <a
-            href="#features"
-            className="glass-btn py-3.5 px-8 border border-white/8 hover:border-white/15"
-          >
-            Explore Features <span className="text-xs">↗</span>
-          </a>
-        </div>
-
-        {/* Dynamic Live Product Preview Card */}
-        <div className="mock-briefing-card animate-fadeIn">
-          <div className="mock-briefing-header">
-            <span className="w-2 h-2 rounded-full bg-pink-500 animate-ping"></span>
-            🟣 AI Daily Briefing
-          </div>
-          <h4 className="mock-briefing-title">Good Morning 👋</h4>
           
-          <div className="mock-briefing-risk-row">
-            <span className="mock-briefing-risk-label">TODAY'S DEADLINE RISK</span>
-            <span className="mock-briefing-risk-value">HIGH (86%)</span>
-          </div>
-
-          <div className="mock-briefing-task-box">
-            <h5 className="mock-briefing-task-title">🔥 DBMS Assignment</h5>
-            <span className="mock-briefing-task-due">Due: Tomorrow at 10:00 AM</span>
-            
-            <p className="mock-briefing-recommendation">
-              <strong>Recommendation:</strong> Start now. Estimated efforts require 2h 15m. Delaying this past 6:00 PM today raises risk to critical levels.
-            </p>
-          </div>
-
-          <button onClick={onStart} className="glass-btn glass-btn-primary w-full justify-center py-2.5 text-xs">
-            Start Focus Session
+          <button
+            onClick={() => onNavigate('insights')}
+            className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-sm font-bold transition cursor-pointer flex items-center justify-center gap-2 border border-white/10"
+          >
+            <LayoutDashboard className="w-4 h-4 text-slate-400" />
+            View Live Insights
           </button>
+        </motion.div>
+      </section>
+
+      {/* Metrics Teaser Bar */}
+      <section className="max-w-6xl w-full mx-auto px-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-xl text-center">
+          <div>
+            <span className="block text-3xl font-extrabold text-white font-mono">{activeTasksCount}</span>
+            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Active Commitments</span>
+          </div>
+          <div className="border-l border-white/10">
+            <span className="block text-3xl font-extrabold text-white font-mono">{habitsCount}</span>
+            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Daily Habit Goals</span>
+          </div>
+          <div className="border-l border-white/10">
+            <span className="block text-3xl font-extrabold text-indigo-400 font-mono">94%</span>
+            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Deadline Safety Index</span>
+          </div>
+          <div className="border-l border-white/10">
+            <span className="block text-3xl font-extrabold text-emerald-400 font-mono">{completedToday}</span>
+            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Done Today</span>
+          </div>
         </div>
-      </main>
+      </section>
 
-      {/* Features Section */}
-      <section id="features" className="landing-section relative z-20">
-        <div className="section-header">
-          <h3 className="section-title">How Alchemi Helps You Execute</h3>
-          <p className="section-subtitle">
-            Three autonomous AI agents coordinate in the background to streamline your execution and protect your focus.
-          </p>
+      {/* Feature Grid Section (The 4 Dashboards Overview) */}
+      <section className="max-w-6xl w-full mx-auto px-4 flex flex-col gap-8">
+        <div className="text-center">
+          <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white font-display">
+            A Multi-Dimensional Mindset Space
+          </h2>
+          <p className="text-slate-400 text-xs mt-1">Four tightly integrated views built to sustain continuous execution loops.</p>
         </div>
 
-        <div className="features-grid">
-          {/* Card 1: Beat Procrastination */}
-          <div className="feature-card-glow card-glow-pink">
-            <div className="card-header-row">
-              <div className="feature-card-icon" style={{ backgroundColor: 'rgba(236, 72, 153, 0.1)', color: '#ec4899' }}>
-                <Compass className="w-5 h-5" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Card 1: Main Landing Dashboard */}
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-indigo-500/10 to-transparent border border-indigo-500/20 backdrop-blur-sm hover:border-indigo-400/40 transition flex flex-col justify-between h-64">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                <Brain className="w-5 h-5" />
               </div>
-              <span className="card-badge">1</span>
-            </div>
-
-            <div className="card-info">
-              <h4 className="feature-card-title">🔥 Beat Procrastination</h4>
-              <p className="feature-card-desc">
-                Calculates your Panic Index dynamically using deadlines, workload, estimated effort, and energy level.
-              </p>
-              <p className="feature-card-desc">
-                Highlights high-risk tasks before they become emergencies.
+              <h3 className="text-sm font-bold text-white font-display">1. Cognitive Hub</h3>
+              <p className="text-[11px] text-slate-400 leading-relaxed mt-2">
+                Your high-altitude flight command dashboard. Teases habits streaks, live schedule progress, and priority scoreboards.
               </p>
             </div>
+            <button onClick={() => onNavigate('home')} className="text-xs font-bold text-indigo-400 flex items-center gap-1 hover:text-indigo-300 transition">
+              Learn More <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
-            <div className="card-preview-box">
-              <div>
-                <div className="panic-preview-title">Panic Index</div>
-                <div className="panic-preview-value">89%</div>
+          {/* Card 2: Login Credentials Dashboard */}
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-purple-500/10 to-transparent border border-purple-500/20 backdrop-blur-sm hover:border-purple-400/40 transition flex flex-col justify-between h-64">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 mb-4 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                <Shield className="w-5 h-5" />
               </div>
-              <svg className="panic-preview-chart" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 30C15 30 20 10 35 15C50 20 55 5 70 10C85 15 90 2 100 5" stroke="#ec4899" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
+              <h3 className="text-sm font-bold text-white font-display">2. Secure Google Gate</h3>
+              <p className="text-[11px] text-slate-400 leading-relaxed mt-2">
+                Personalized user profiles. Login with Google seamlessly to bind your tasks to private database parameters.
+              </p>
+            </div>
+            <button onClick={() => onNavigate('login')} className="text-xs font-bold text-purple-400 flex items-center gap-1 hover:text-purple-300 transition">
+              {isLoggedIn ? 'Manage Account' : 'Sign In Now'} <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Card 3: Task Focus Workspace Dashboard */}
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-pink-500/10 to-transparent border border-pink-500/20 backdrop-blur-sm hover:border-pink-400/40 transition flex flex-col justify-between h-64">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-pink-500/20 flex items-center justify-center text-pink-400 mb-4 border border-pink-500/30 shadow-[0_0_15px_rgba(236,72,153,0.2)]">
+                <Target className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-white font-display">3. Live Focus Workspace</h3>
+              <p className="text-[11px] text-slate-400 leading-relaxed mt-2">
+                Contains the Pomodoro focus ring, the active hour-by-hour calendar schedule, and our Gemini AI chat assistant.
+              </p>
+            </div>
+            <button onClick={() => onNavigate('workspace')} className="text-xs font-bold text-pink-400 flex items-center gap-1 hover:text-pink-300 transition">
+              Enter Sandbox <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Card 4: Analytics Insights Dashboard */}
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-emerald-500/10 to-transparent border border-emerald-500/20 backdrop-blur-sm hover:border-emerald-400/40 transition flex flex-col justify-between h-64">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                <Trophy className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-white font-display">4. Alchemi Insights</h3>
+              <p className="text-[11px] text-slate-400 leading-relaxed mt-2">
+                Rich data analysis dashboard. Dynamic productivity score indicators, bar charts of task categories, and habit records.
+              </p>
+            </div>
+            <button onClick={() => onNavigate('insights')} className="text-xs font-bold text-emerald-400 flex items-center gap-1 hover:text-emerald-300 transition">
+              View Statistics <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive Interactive Section: Focus Coach introduction */}
+      <section className="max-w-6xl w-full mx-auto px-4">
+        <div className="p-8 rounded-3xl bg-white/[0.03] border border-white/10 relative overflow-hidden flex flex-col lg:flex-row gap-8 items-center">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
+          
+          <div className="flex-1 flex flex-col gap-4">
+            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block">Proactive Mentorship</span>
+            <h2 className="text-2xl md:text-3xl font-bold text-white font-display tracking-tight leading-tight">
+              An AI Coach that acts, rather than just responds.
+            </h2>
+            <p className="text-slate-400 text-xs leading-relaxed">
+              Most tools wait for you to type. Alchemi's AI coach continuously parses your active task timeline, flags impending deadlines, and suggests action items—such as auto-breaking a project into incremental subtasks—with a one-click acceptance interface.
+            </p>
+            <div className="flex flex-col gap-3 mt-2">
+              <div className="flex items-center gap-2.5">
+                <CheckCircle className="w-4 h-4 text-indigo-400" />
+                <span className="text-xs text-slate-300 font-semibold">Automatic priority rating (🔮 Alchemi score)</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <CheckCircle className="w-4 h-4 text-indigo-400" />
+                <span className="text-xs text-slate-300 font-semibold">Task breakdown step recommendations</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <CheckCircle className="w-4 h-4 text-indigo-400" />
+                <span className="text-xs text-slate-300 font-semibold">One-click calendar scheduling allocations</span>
+              </div>
             </div>
           </div>
 
-          {/* Card 2: Auto-Schedule Your Day */}
-          <div className="feature-card-glow card-glow-cyan">
-            <div className="card-header-row">
-              <div className="feature-card-icon" style={{ backgroundColor: 'rgba(6, 182, 212, 0.1)', color: '#0ea5e9' }}>
-                <Calendar className="w-5 h-5" />
-              </div>
-              <span className="card-badge">2</span>
-            </div>
-
-            <div className="card-info">
-              <h4 className="feature-card-title">🧠 Auto-Schedule Your Day</h4>
-              <p className="feature-card-desc">
-                Breaks goals into milestones.
-              </p>
-              <p className="feature-card-desc">
-                Automatically builds a balanced schedule while protecting meetings, meals, and breaks.
-              </p>
-            </div>
-
-            <div className="card-preview-box" style={{ padding: '12px' }}>
-              <div className="schedule-preview-list">
-                <div className="schedule-preview-item">
-                  <span className="schedule-preview-time">9:00</span>
-                  <span className="schedule-preview-label">Deep Work</span>
-                </div>
-                <div className="schedule-preview-item">
-                  <span className="schedule-preview-time">11:00</span>
-                  <span className="schedule-preview-label">Meeting</span>
-                </div>
-                <div className="schedule-preview-item">
-                  <span className="schedule-preview-time">1:00</span>
-                  <span className="schedule-preview-label">Lunch Break</span>
-                </div>
-                <div className="schedule-preview-item">
-                  <span className="schedule-preview-time">2:00</span>
-                  <span className="schedule-preview-label">Project Work</span>
-                </div>
-                <div className="schedule-preview-item">
-                  <span className="schedule-preview-time">4:30</span>
-                  <span className="schedule-preview-label">Review</span>
-                </div>
+          <div className="w-full lg:w-96 p-5 rounded-2xl bg-black/40 border border-white/5 backdrop-blur-md shadow-inner flex flex-col gap-3">
+            <div className="flex items-center gap-2 border-b border-white/5 pb-2">
+              <Bot className="w-5 h-5 text-indigo-400 animate-pulse" />
+              <div className="text-left">
+                <span className="text-xs font-bold text-white block leading-none">Alchemi AI Coach</span>
+                <span className="text-[9px] text-slate-500">Autonomous Core</span>
               </div>
             </div>
-          </div>
-
-          {/* Card 3: AI Starter Drafts */}
-          <div className="feature-card-glow card-glow-purple">
-            <div className="card-header-row">
-              <div className="feature-card-icon" style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)', color: '#c084fc' }}>
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <span className="card-badge">3</span>
+            
+            <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-[11px] text-slate-300 leading-relaxed italic">
+              "Hi! I noticed your Study assignment is due in 16 hours. I've formulated a 3-step focus schedule at 2:00 PM today to guarantee safe completion. Would you like to write this to your calendar?"
             </div>
 
-            <div className="card-info">
-              <h4 className="feature-card-title">✨ AI Starter Drafts</h4>
-              <p className="feature-card-desc">
-                Instantly generates checklists, outlines, email drafts, coding boilerplates, and research summaries.
-              </p>
-              <p className="feature-card-desc">
-                Provides starter assets so users can take action and begin working immediately.
-              </p>
-            </div>
-
-            <div className="card-preview-box" style={{ padding: '12px', background: 'transparent', border: 'none' }}>
-              <div className="asset-preview-list">
-                <div className="asset-preview-item">
-                  <span className="text-violet-400" style={{ marginRight: '2px' }}>✓</span> Checklist
-                </div>
-                <div className="asset-preview-item">
-                  <span className="text-violet-400" style={{ marginRight: '2px' }}>✉</span> Email
-                </div>
-                <div className="asset-preview-item">
-                  <span className="text-violet-400" style={{ marginRight: '2px' }}>&lt;/&gt;</span> Code
-                </div>
-                <div className="asset-preview-item">
-                  <span className="text-violet-400" style={{ marginRight: '2px' }}>☰</span> Outline
-                </div>
-              </div>
+            <div className="flex items-center gap-2 mt-1">
+              <button
+                onClick={() => onNavigate('workspace')}
+                className="flex-1 py-1.5 bg-indigo-500 text-white text-[10px] font-black rounded-lg cursor-pointer transition hover:bg-indigo-600"
+              >
+                Accept Allocation Plan
+              </button>
+              <button className="px-3 py-1.5 bg-white/5 text-slate-400 text-[10px] font-bold rounded-lg hover:text-white transition">
+                Dismiss
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="landing-section relative z-20">
-        <div className="section-header">
-          <h3 className="section-title">The Execution Pipeline</h3>
-          <p className="section-subtitle">
-            How Alchemi transforms chaotic, last-minute panic into structured, step-by-step progress.
-          </p>
-        </div>
+      {/* User Benefits Comparison */}
+      <section className="max-w-5xl w-full mx-auto px-4 text-center">
+        <h2 className="text-xl md:text-2xl font-bold text-white font-display mb-8">What Alchemi Solves</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+          <div className="p-6 rounded-2xl bg-rose-500/5 border border-rose-500/10">
+            <h3 className="text-xs font-bold text-rose-400 uppercase tracking-widest mb-3">Legacy Planning Tools</h3>
+            <ul className="flex flex-col gap-3 text-xs text-slate-400 font-semibold">
+              <li className="flex items-start gap-2">
+                <span className="text-rose-500 font-bold">•</span>
+                <span>Static lists that sit there, forgotten until overdue</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-rose-500 font-bold">•</span>
+                <span>Requires hours of tedious manual time-blocking</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-rose-500 font-bold">•</span>
+                <span>No understanding of cognitive workload or stress indexes</span>
+              </li>
+            </ul>
+          </div>
 
-        <div className="workflow-timeline">
-          <div className="workflow-step">
-            <div className="workflow-step-number">01</div>
-            <span className="workflow-step-title">Add Goals</span>
-          </div>
-          <div className="workflow-step">
-            <div className="workflow-step-number" style={{ borderColor: 'var(--color-warning)' }}>02</div>
-            <span className="workflow-step-title">AI Computes Panic Index</span>
-          </div>
-          <div className="workflow-step">
-            <div className="workflow-step-number" style={{ borderColor: 'var(--color-urgent)' }}>03</div>
-            <span className="workflow-step-title">AI Generates Plan & Drafts</span>
-          </div>
-          <div className="workflow-step">
-            <div className="workflow-step-number" style={{ borderColor: 'var(--color-critical)' }}>04</div>
-            <span className="workflow-step-title">Execute in Focus Mode</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Alchemi Section */}
-      <section id="why-alchemi" className="landing-section relative z-20">
-        <div className="section-header">
-          <h3 className="section-title">Why Alchemi?</h3>
-          <p className="section-subtitle">
-            Most to-do lists are passive dumpsters of tasks. Alchemi is an active execution assistant.
-          </p>
-        </div>
-
-        <div className="comparison-table-wrapper">
-          <table className="comparison-table">
-            <thead>
-              <tr>
-                <th>Feature Capability</th>
-                <th>Traditional To-Do Apps</th>
-                <th>Alchemi OS</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Task Reminders</strong></td>
-                <td className="comparison-traditional">Static reminders</td>
-                <td className="comparison-alchemi">Dynamic adaptive planning</td>
-              </tr>
-              <tr>
-                <td><strong>Prioritization</strong></td>
-                <td className="comparison-traditional">Manual ranking</td>
-                <td className="comparison-alchemi">AI energy & deadline indexation</td>
-              </tr>
-              <tr>
-                <td><strong>Daily Scheduling</strong></td>
-                <td className="comparison-traditional">Fixed times (rigid)</td>
-                <td className="comparison-alchemi">Continuous calendar block replanning</td>
-              </tr>
-              <tr>
-                <td><strong>Deadline Risk Analysis</strong></td>
-                <td className="comparison-traditional">No risk prediction</td>
-                <td className="comparison-alchemi">Proactive warning indicators</td>
-              </tr>
-              <tr>
-                <td><strong>Decision Guidance</strong></td>
-                <td className="comparison-traditional">User decides everything</td>
-                <td className="comparison-alchemi">AI recommends immediate next actions</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* AI Agent Section */}
-      <section id="agents" className="landing-section relative z-20">
-        <div className="section-header">
-          <h3 className="section-title">Meet the Alchemi Agent Network</h3>
-          <p className="section-subtitle">
-            Five specialized autonomous agents coordinate in the background to handle the planning, scheduling, and risk assessment.
-          </p>
-        </div>
-
-        <div className="agents-chain">
-          <div className="agent-node">
-            <div className="agent-node-icon" style={{ borderColor: '#3b82f6' }}>🧠</div>
-            <span className="agent-node-name">Planner Agent</span>
-          </div>
-          <div className="agent-node">
-            <div className="agent-node-icon" style={{ borderColor: '#f59e0b' }}>🔥</div>
-            <span className="agent-node-name">Prioritizer Agent</span>
-          </div>
-          <div className="agent-node">
-            <div className="agent-node-icon" style={{ borderColor: '#ef4444' }}>⚠</div>
-            <span className="agent-node-name">Risk Predictor</span>
-          </div>
-          <div className="agent-node">
-            <div className="agent-node-icon" style={{ borderColor: '#10b981' }}>💡</div>
-            <span className="agent-node-name">Coach Agent</span>
-          </div>
-          <div className="agent-node">
-            <div className="agent-node-icon" style={{ borderColor: '#a855f7' }}>📊</div>
-            <span className="agent-node-name">Reflection Agent</span>
+          <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">The Alchemi Standard</h3>
+            <ul className="flex flex-col gap-3 text-xs text-slate-300 font-semibold">
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-400 font-bold">✓</span>
+                <span>Proactive agents suggest focus times before panic sets in</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-400 font-bold">✓</span>
+                <span>One-click AI Auto-Scheduling spreads out work balances</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-400 font-bold">✓</span>
+                <span>Atomic habit streaks combined with active focus timers</span>
+              </li>
+            </ul>
           </div>
         </div>
       </section>
-
-      {/* See It in Action Demo Section */}
-      <section id="demo" className="landing-section relative z-20">
-        <div className="section-header">
-          <h3 className="section-title">See It in Action</h3>
-          <p className="section-subtitle">
-            Watch how a high-urgency goal is processed from input to completion.
-          </p>
-        </div>
-
-        <div className="demo-flow-wrapper">
-          <div className="demo-step">
-            <div className="demo-step-label">1. Goal Input</div>
-            <div className="demo-step-value" style={{ color: '#c084fc' }}>React Assignment</div>
-          </div>
-          <div className="demo-connector"><ArrowRight className="w-5 h-5" /></div>
-
-          <div className="demo-step" style={{ borderColor: 'rgba(236, 72, 153, 0.3)' }}>
-            <div className="demo-step-label">2. AI Risk Score</div>
-            <div className="demo-step-value" style={{ color: '#ec4899' }}>82% Risk</div>
-          </div>
-          <div className="demo-connector"><ArrowRight className="w-5 h-5" /></div>
-
-          <div className="demo-step">
-            <div className="demo-step-label">3. Deconstruct</div>
-            <div className="demo-step-value">6 Subtasks</div>
-          </div>
-          <div className="demo-connector"><ArrowRight className="w-5 h-5" /></div>
-
-          <div className="demo-step" style={{ borderColor: 'rgba(6, 182, 212, 0.3)' }}>
-            <div className="demo-step-label">4. Auto-Schedule</div>
-            <div className="demo-step-value" style={{ color: '#22d3ee' }}>Today 6:00 PM</div>
-          </div>
-          <div className="demo-connector"><ArrowRight className="w-5 h-5" /></div>
-
-          <div className="demo-step">
-            <div className="demo-step-label">5. Focus Mode</div>
-            <div className="demo-step-value">Ambient Noise</div>
-          </div>
-          <div className="demo-connector"><ArrowRight className="w-5 h-5" /></div>
-
-          <div className="demo-step" style={{ borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-            <div className="demo-step-label">6. Outcome</div>
-            <div className="demo-step-value" style={{ color: '#10b981' }}>Completed 🎉</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="footer-container relative z-20">
-        <div className="footer-logo">
-          <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 3H15M10 3V8.462L5.277 17.908C4.55 19.362 5.606 21 7.231 21H16.769C18.394 21 19.45 19.362 18.723 17.908L14 8.462V3" stroke="url(#footerFlask)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M7.5 16.5C9.5 14.5 10.5 18.5 12.5 16.5C14.5 14.5 15.5 18.5 16.5 16.5" stroke="url(#footerLiquid)" strokeWidth="1.5" strokeLinecap="round"/>
-            <path d="M12 11L12.5 12.5L14 13L12.5 13.5L12 15L11.5 13.5L10 13L11.5 12.5L12 11Z" fill="#ffffff"/>
-            <defs>
-              <linearGradient id="footerFlask" x1="5" y1="3" x2="19" y2="21" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#c084fc"/>
-                <stop offset="100%" stopColor="#6366f1"/>
-              </linearGradient>
-              <linearGradient id="footerLiquid" x1="7.5" y1="15" x2="16.5" y2="18" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#ec4899"/>
-                <stop offset="100%" stopColor="#a855f7"/>
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-        
-        <div className="footer-links">
-          <a href="https://github.com/shravani-n-10/Alchemi." target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
-          <a href="#features" className="footer-link">Features</a>
-          <a href="#how-it-works" className="footer-link">How It Works</a>
-          <a href="#why-alchemi" className="footer-link">Why Us</a>
-          <a href="#agents" className="footer-link">AI Agents</a>
-        </div>
-
-        <p>© 2026 Alchemi Productivity Inc. All Rights Reserved.</p>
-        <p>Developed for the Coding Ninjas 10x Vibe2Ship Hackathon. Powered by Google AI Studio.</p>
-      </footer>
     </div>
   );
-};
-
-export default LandingPage;
+}
