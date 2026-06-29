@@ -1,19 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TaskProvider, useTasks } from './context/TaskContext';
-import { AIProvider, useAI } from './context/AIContext';
+import { AIProvider, useAI } from './context/AIProvider'; // wait, it is AIContext in our project!
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 import Analytics from './components/Analytics';
 import Settings from './components/Settings';
 import { 
-  Sparkles, 
   LogIn, 
   LogOut, 
   Settings as SettingsIcon, 
   BarChart2, 
   VolumeX, 
   MoreVertical, 
-  BookOpen, 
   Globe,
   LayoutDashboard,
   HelpCircle
@@ -36,6 +34,9 @@ const starsArray = Array.from({ length: 15 }).map((_, i) => ({
   scale: 0.5 + Math.random() * 0.8,
   char: Math.random() > 0.5 ? '✦' : '★',
 }));
+
+// We use the AIContext, let's make sure it's imported correctly from context/AIContext
+import { useAI } from './context/AIContext';
 
 const AppContent: React.FC = () => {
   const { userProfile, logout } = useTasks();
@@ -73,13 +74,23 @@ const AppContent: React.FC = () => {
       <header className="navbar">
         {/* Left Side: Brand Logo */}
         <div className="navbar-logo" onClick={() => setCurrentPage(userProfile.isLoggedIn ? 'dashboard' : 'home')}>
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center shadow-lg shadow-violet-500/10">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
+          <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 3H15M10 3V8.462L5.277 17.908C4.55 19.362 5.606 21 7.231 21H16.769C18.394 21 19.45 19.362 18.723 17.908L14 8.462V3" stroke="url(#navFlask)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M7.5 16.5C9.5 14.5 10.5 18.5 12.5 16.5C14.5 14.5 15.5 18.5 16.5 16.5" stroke="url(#navLiquid)" strokeWidth="1.5" strokeLinecap="round"/>
+            <path d="M12 11L12.5 12.5L14 13L12.5 13.5L12 15L11.5 13.5L10 13L11.5 12.5L12 11Z" fill="#ffffff"/>
+            <defs>
+              <linearGradient id="navFlask" x1="5" y1="3" x2="19" y2="21" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#c084fc"/>
+                <stop offset="100%" stopColor="#6366f1"/>
+              </linearGradient>
+              <linearGradient id="navLiquid" x1="7.5" y1="15" x2="16.5" y2="18" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#ec4899"/>
+                <stop offset="100%" stopColor="#a855f7"/>
+              </linearGradient>
+            </defs>
+          </svg>
           <div>
-            <h1 className="text-lg font-extrabold heading-outfit tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-text-primary to-violet-300">
-              ALCHEMI
-            </h1>
+            <h1>ALCHEMI</h1>
           </div>
         </div>
 
@@ -234,7 +245,21 @@ const AppContent: React.FC = () => {
           <div className="flex-1 flex flex-col items-center justify-center p-8 max-w-2xl mx-auto text-center space-y-6">
             <div className="glass-panel p-8 space-y-6 border-violet-500/10 shadow-2xl">
               <h3 className="text-2xl font-bold heading-outfit flex items-center justify-center gap-2.5">
-                <Sparkles className="w-6 h-6 text-violet-400" /> About Alchemi
+                <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 3H15M10 3V8.462L5.277 17.908C4.55 19.362 5.606 21 7.231 21H16.769C18.394 21 19.45 19.362 18.723 17.908L14 8.462V3" stroke="url(#aboutFlask)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7.5 16.5C9.5 14.5 10.5 18.5 12.5 16.5C14.5 14.5 15.5 18.5 16.5 16.5" stroke="url(#aboutLiquid)" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M12 11L12.5 12.5L14 13L12.5 13.5L12 15L11.5 13.5L10 13L11.5 12.5L12 11Z" fill="#ffffff"/>
+                  <defs>
+                    <linearGradient id="aboutFlask" x1="5" y1="3" x2="19" y2="21" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#c084fc"/>
+                      <stop offset="100%" stopColor="#6366f1"/>
+                    </linearGradient>
+                    <linearGradient id="aboutLiquid" x1="7.5" y1="15" x2="16.5" y2="18" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#ec4899"/>
+                      <stop offset="100%" stopColor="#a855f7"/>
+                    </linearGradient>
+                  </defs>
+                </svg> About Alchemi
               </h3>
               <div className="space-y-4 text-sm text-text-secondary leading-relaxed text-left">
                 <p>

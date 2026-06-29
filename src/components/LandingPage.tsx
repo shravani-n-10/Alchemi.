@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTasks } from '../context/TaskContext';
-import { Sparkles, ShieldAlert, Calendar, Brain, ChevronRight } from 'lucide-react';
+import { Sparkles, Calendar, LogIn, ChevronRight, Compass } from 'lucide-react';
 
 interface LandingPageProps {
   onEnter: () => void;
@@ -38,136 +38,190 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, on
   };
 
   return (
-    <div className="min-h-[calc(100vh-70px)] flex flex-col justify-between relative overflow-hidden text-text-primary">
+    <div className="flex flex-col justify-between relative overflow-hidden text-text-primary">
       {/* Background blobs */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-pink-500/5 rounded-full blur-[100px] pointer-events-none"></div>
 
-      {/* Hero Section (Centered) */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-16 relative z-20 text-center">
-        <div className="max-w-4xl w-full space-y-8 flex flex-col items-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-950/20 border border-violet-500/20 text-xs font-medium text-violet-300 animate-pulse">
-            <Sparkles className="w-3.5 h-3.5" /> Introducing Alchemi 1.0 — Proactive Multi-Agent OS
-          </div>
+      {/* Hero Section */}
+      <main className="hero-container relative z-20">
+        <div className="hero-badge">
+          <Sparkles className="w-3.5 h-3.5" /> Introducing Alchemi 1.0 — Proactive Multi-Agent OS
+        </div>
 
-          <h2 className="text-4xl md:text-6xl font-extrabold heading-outfit leading-[1.15] tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-violet-200 text-center">
-            Conquer Your Deadlines <br />
-            Before the Panic Sets In.
-          </h2>
+        <h2 className="hero-title">
+          Conquer Your Deadlines <br />
+          <span className="gradient">Before the Panic Sets In.</span>
+        </h2>
 
-          <p className="text-sm md:text-base text-text-secondary max-w-2xl leading-relaxed text-center">
-            Alchemi helps you beat procrastination by converting passive reminders into active, AI-scheduled task execution. It calculates your urgency using a dynamic **Panic Index**, breaks down complex goals, and auto-generates **AI Starter Drafts** so you can start working instantly.
-          </p>
+        <div className="hero-divider">── ✦ ──</div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
-            <button
-              onClick={openAuthModal}
-              className="glass-btn glass-btn-primary py-3 px-8 text-sm flex items-center gap-2 shadow-lg w-full sm:w-auto justify-center"
-            >
-              Get Started Free <ChevronRight className="w-4 h-4" />
-            </button>
-            <a
-              href="#features"
-              className="glass-btn py-3 px-8 text-sm border border-white/5 hover:border-white/10 w-full sm:w-auto justify-center"
-            >
-              Explore Features
-            </a>
-          </div>
+        <p className="hero-description">
+          Alchemi helps you beat procrastination by converting passive reminders into active, AI-scheduled task execution. It calculates your urgency using a dynamic <span className="text-pink">Panic Index</span>, breaks down complex goals, and generates <span className="text-cyan">AI Starter Drafts</span> so you can begin working immediately.
+        </p>
 
-          {/* Glassmorphic Mockup Preview */}
-          <div className="pt-8 max-w-3xl w-full mx-auto animate-fadeIn">
-            <div className="glass-panel p-4 aspect-[16/9] border-violet-500/10 shadow-2xl relative overflow-hidden flex flex-col justify-between text-left">
-              {/* Mockup header */}
-              <div className="flex justify-between items-center pb-3 border-b border-white/5">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-red-500/40"></span>
-                  <span className="w-3 h-3 rounded-full bg-yellow-500/40"></span>
-                  <span className="w-3 h-3 rounded-full bg-green-500/40"></span>
-                  <span className="text-[10px] text-text-muted ml-2 font-mono">alchemi.ai/workspace</span>
-                </div>
-                <div className="w-20 h-4 rounded bg-white/5"></div>
-              </div>
-              
-              {/* Mockup layout */}
-              <div className="flex-1 grid grid-cols-3 gap-3 pt-3">
-                <div className="rounded-lg bg-white/5 border border-white/5 p-3 flex flex-col justify-between">
-                  <div className="w-12 h-3 rounded bg-cyan-500/20"></div>
-                  <div className="space-y-1.5">
-                    <div className="w-full h-2 rounded bg-white/5"></div>
-                    <div className="w-5/6 h-2 rounded bg-white/5"></div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="w-8 h-2 rounded bg-white/5"></div>
-                    <div className="w-6 h-3 rounded-full bg-cyan-500/30"></div>
-                  </div>
-                </div>
-                <div className="rounded-lg bg-white/5 border border-white/5 p-3 flex flex-col justify-between col-span-2">
-                  <div className="flex justify-between">
-                    <div className="w-20 h-3 rounded bg-violet-500/20"></div>
-                    <div className="w-8 h-3 rounded bg-white/5"></div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="w-full h-2 rounded bg-white/5"></div>
-                    <div className="w-full h-2 rounded bg-white/5"></div>
-                    <div className="w-4/5 h-2 rounded bg-white/5"></div>
-                  </div>
-                  <div className="w-full h-6 rounded bg-violet-600/20"></div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="hero-buttons">
+          <button
+            onClick={openAuthModal}
+            className="glass-btn glass-btn-primary py-3.5 px-8"
+          >
+            Get Started Free <Sparkles className="w-4 h-4" />
+          </button>
+          <a
+            href="#features"
+            className="glass-btn py-3.5 px-8 border border-white/8 hover:border-white/15"
+          >
+            Explore Features <span className="text-xs">↗</span>
+          </a>
         </div>
       </main>
 
-      {/* Features Section (Glow Slide Boxes) */}
-      <section id="features" className="px-6 py-16 max-w-6xl mx-auto w-full relative z-20 border-t border-white/5">
-        <div className="text-center space-y-2 mb-12">
-          <h3 className="text-2xl font-bold heading-outfit">How Alchemi Helps You Execute</h3>
-          <p className="text-xs text-text-secondary max-w-md mx-auto">
-            Three core autonomous agents coordinate in the background to streamline your execution.
+      {/* Features Section */}
+      <section id="features" className="features-section relative z-20">
+        <div className="features-header">
+          <h3 className="features-title">How Alchemi Helps You Execute</h3>
+          <p className="features-subtitle">
+            Three autonomous AI agents work together behind the scenes to help you plan, prioritize, and complete your work before deadlines.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1 */}
-          <div className="feature-card-glow p-6 rounded-2xl space-y-4">
-            <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-              <ShieldAlert className="w-5 h-5" />
+        <div className="features-grid">
+          {/* Card 1: Beat Procrastination */}
+          <div className="feature-card-glow card-glow-pink">
+            <div className="card-header-row">
+              <div className="feature-card-icon" style={{ backgroundColor: 'rgba(236, 72, 153, 0.1)', color: '#ec4899' }}>
+                <Compass className="w-5 h-5" />
+              </div>
+              <span className="card-badge">1</span>
             </div>
-            <h4 className="text-base font-bold heading-outfit text-white">1. Beat Procrastination</h4>
-            <p className="text-xs text-text-secondary leading-relaxed">
-              Calculates your **Panic Index** dynamically. Adapts to your energy level and deadlines, highlighting "Silent Killers" that need immediate attention.
-            </p>
+
+            <div className="card-info">
+              <h4 className="feature-card-title">🔥 Beat Procrastination</h4>
+              <p className="feature-card-desc">
+                Calculates your Panic Index dynamically using deadlines, workload, estimated effort, and energy level.
+              </p>
+              <p className="feature-card-desc">
+                Highlights high-risk tasks before they become emergencies.
+              </p>
+            </div>
+
+            <div className="card-preview-box">
+              <div>
+                <div className="panic-preview-title">Panic Index</div>
+                <div className="panic-preview-value">89%</div>
+              </div>
+              <svg className="panic-preview-chart" viewBox="0 0 100 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 30C15 30 20 10 35 15C50 20 55 5 70 10C85 15 90 2 100 5" stroke="#ec4899" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
           </div>
-          {/* Card 2 */}
-          <div className="feature-card-glow p-6 rounded-2xl space-y-4">
-            <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400">
-              <Calendar className="w-5 h-5" />
+
+          {/* Card 2: Auto-Schedule Your Day */}
+          <div className="feature-card-glow card-glow-cyan">
+            <div className="card-header-row">
+              <div className="feature-card-icon" style={{ backgroundColor: 'rgba(6, 182, 212, 0.1)', color: '#0ea5e9' }}>
+                <Calendar className="w-5 h-5" />
+              </div>
+              <span className="card-badge">2</span>
             </div>
-            <h4 className="text-base font-bold heading-outfit text-white">2. Auto-Schedule Your Day</h4>
-            <p className="text-xs text-text-secondary leading-relaxed">
-              Deconstructs your goals into milestones and **auto-schedules** them. Protects your calendar commitments, meetings, meals, and breaks automatically.
-            </p>
+
+            <div className="card-info">
+              <h4 className="feature-card-title">🧠 Auto-Schedule Your Day</h4>
+              <p className="feature-card-desc">
+                Breaks goals into milestones.
+              </p>
+              <p className="feature-card-desc">
+                Automatically builds a balanced schedule while protecting meetings, meals, and breaks.
+              </p>
+            </div>
+
+            <div className="card-preview-box" style={{ padding: '12px' }}>
+              <div className="schedule-preview-list">
+                <div className="schedule-preview-item">
+                  <span className="schedule-preview-time">9:00</span>
+                  <span className="schedule-preview-label">Deep Work</span>
+                </div>
+                <div className="schedule-preview-item">
+                  <span className="schedule-preview-time">11:00</span>
+                  <span className="schedule-preview-label">Meeting</span>
+                </div>
+                <div className="schedule-preview-item">
+                  <span className="schedule-preview-time">1:00</span>
+                  <span className="schedule-preview-label">Lunch Break</span>
+                </div>
+                <div className="schedule-preview-item">
+                  <span className="schedule-preview-time">2:00</span>
+                  <span className="schedule-preview-label">Project Work</span>
+                </div>
+                <div className="schedule-preview-item">
+                  <span className="schedule-preview-time">4:30</span>
+                  <span className="schedule-preview-label">Review</span>
+                </div>
+              </div>
+            </div>
           </div>
-          {/* Card 3 */}
-          <div className="feature-card-glow p-6 rounded-2xl space-y-4">
-            <div className="w-10 h-10 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-400">
-              <Brain className="w-5 h-5" />
+
+          {/* Card 3: AI Starter Drafts */}
+          <div className="feature-card-glow card-glow-purple">
+            <div className="card-header-row">
+              <div className="feature-card-icon" style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)', color: '#c084fc' }}>
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <span className="card-badge">3</span>
             </div>
-            <h4 className="text-base font-bold heading-outfit text-white">3. Create Starter Drafts</h4>
-            <p className="text-xs text-text-secondary leading-relaxed">
-              When a task is added, the AI generates a step-by-step checklist and **Starter Assets** (pre-written email drafts, code boilerplates, outlines) so you can take action instantly.
-            </p>
+
+            <div className="card-info">
+              <h4 className="feature-card-title">✨ AI Starter Drafts</h4>
+              <p className="feature-card-desc">
+                Instantly generates checklists, outlines, email drafts, coding boilerplates, and research summaries.
+              </p>
+              <p className="feature-card-desc">
+                Provides starter assets so users can take action and begin working immediately.
+              </p>
+            </div>
+
+            <div className="card-preview-box" style={{ padding: '12px', background: 'transparent', border: 'none' }}>
+              <div className="asset-preview-list">
+                <div className="asset-preview-item">
+                  <span className="text-violet-400" style={{ marginRight: '2px' }}>✓</span> Checklist
+                </div>
+                <div className="asset-preview-item">
+                  <span className="text-violet-400" style={{ marginRight: '2px' }}>✉</span> Email
+                </div>
+                <div className="asset-preview-item">
+                  <span className="text-violet-400" style={{ marginRight: '2px' }}>&lt;/&gt;</span> Code
+                </div>
+                <div className="asset-preview-item">
+                  <span className="text-violet-400" style={{ marginRight: '2px' }}>☰</span> Outline
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Footer (Centered) */}
-      <footer className="px-6 py-8 border-t border-white/5 text-center text-[11px] text-text-muted relative z-20 flex flex-col items-center justify-center gap-1.5">
+      {/* Footer */}
+      <footer className="footer-container relative z-20">
+        <div className="footer-logo">
+          <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 3H15M10 3V8.462L5.277 17.908C4.55 19.362 5.606 21 7.231 21H16.769C18.394 21 19.45 19.362 18.723 17.908L14 8.462V3" stroke="url(#footerFlask)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M7.5 16.5C9.5 14.5 10.5 18.5 12.5 16.5C14.5 14.5 15.5 18.5 16.5 16.5" stroke="url(#footerLiquid)" strokeWidth="1.5" strokeLinecap="round"/>
+            <path d="M12 11L12.5 12.5L14 13L12.5 13.5L12 15L11.5 13.5L10 13L11.5 12.5L12 11Z" fill="#ffffff"/>
+            <defs>
+              <linearGradient id="footerFlask" x1="5" y1="3" x2="19" y2="21" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#c084fc"/>
+                <stop offset="100%" stopColor="#6366f1"/>
+              </linearGradient>
+              <linearGradient id="footerLiquid" x1="7.5" y1="15" x2="16.5" y2="18" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#ec4899"/>
+                <stop offset="100%" stopColor="#a855f7"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
         <p>© 2026 Alchemi Productivity Inc. All rights reserved.</p>
-        <p>
-          Developed for the Coding Ninjas 10x Vibe2Ship Hackathon. Powered by Google AI Studio.
-        </p>
+        <p>Developed for the Coding Ninjas 10x Vibe2Ship Hackathon</p>
+        <p>Powered by Google AI Studio</p>
       </footer>
 
       {/* Google Authentication Modal */}
@@ -183,7 +237,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, on
 
             <div className="flex flex-col items-center mb-6">
               <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md mb-3">
-                {/* Google Colored Logo Icon */}
                 <svg className="w-6 h-6" viewBox="0 0 24 24">
                   <path
                     fill="#EA4335"
@@ -211,7 +264,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, on
               </p>
             </div>
 
-            {/* Quick One-Click Google Login */}
             <button
               onClick={handleDemoLogin}
               className="w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-white text-slate-900 hover:bg-slate-100 transition-all font-semibold text-xs shadow"
@@ -225,7 +277,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, on
               <div className="flex-1 h-px bg-white/10"></div>
             </div>
 
-            {/* Custom Google Login Form */}
             <form onSubmit={handleCustomLogin} className="space-y-3 text-left">
               <div>
                 <span className="text-[9px] text-text-secondary uppercase tracking-wider block mb-1">Full Name</span>
