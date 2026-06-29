@@ -321,3 +321,38 @@ body::before {
 .heading-outfit {
   font-family: 'Outfit', sans-serif;
 }
+
+/* Feature Cards Glow (Slide Boxes) */
+.feature-card-glow {
+  background: rgba(15, 8, 38, 0.45);
+  border: 1px solid rgba(167, 139, 250, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.4), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.feature-card-glow:hover {
+  transform: translateY(-5px);
+  border-color: rgba(167, 139, 250, 0.45);
+  box-shadow: 0 12px 40px rgba(167, 139, 250, 0.15), inset 0 0 12px rgba(167, 139, 250, 0.08);
+}
+
+.feature-card-glow:hover::before {
+  transform: translateX(100%);
+}
+
