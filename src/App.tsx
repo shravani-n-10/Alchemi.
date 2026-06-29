@@ -41,13 +41,13 @@ const starsArray = Array.from({ length: 15 }).map((_, i) => ({
 const AppContent: React.FC = () => {
   const { userProfile, logout } = useTasks();
   const { isSpeaking, stopSpeaking } = useAI();
-  const [currentPage, setCurrentPage] = useState<'home' | 'signin' | 'about' | 'guide' | 'dashboard' | 'analytics'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'signin' | 'create-task' | 'about' | 'guide' | 'dashboard' | 'analytics'>('home');
   const [showSettings, setShowSettings] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleNavClick = (page: 'home' | 'signin' | 'about' | 'guide' | 'dashboard' | 'analytics', anchor?: string) => {
+  const handleNavClick = (page: 'home' | 'signin' | 'create-task' | 'about' | 'guide' | 'dashboard' | 'analytics', anchor?: string) => {
     setCurrentPage(page);
     if (anchor) {
       setTimeout(() => {

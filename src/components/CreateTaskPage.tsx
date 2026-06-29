@@ -50,8 +50,8 @@ export const CreateTaskPage: React.FC<CreateTaskPageProps> = ({ onBack, onSucces
       const panic = calculatePanicIndex(hours, new Date(dueDate).toISOString(), energyLevel);
       setLivePanic(panic);
       
-      const { label, color } = getPanicStatus(panic);
-      setRiskLevel(label);
+      const { status, color } = getPanicStatus(panic);
+      setRiskLevel(status.toUpperCase());
       setRiskColor(color);
     } else {
       setLivePanic(0);
