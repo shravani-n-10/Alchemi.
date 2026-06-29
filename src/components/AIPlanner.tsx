@@ -41,38 +41,19 @@ export const AIPlanner: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full gap-4 overflow-y-auto pr-1">
-      {/* Momentum Meter */}
-      <div className="glass-panel p-4 flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h2 className="text-sm font-bold heading-outfit flex items-center gap-1.5 text-text-primary">
-            <Sparkles className="w-4 h-4 text-violet-400" /> Momentum Meter
-          </h2>
-          <p className="text-[10px] text-text-secondary">
-            Keep completing tasks and habits to maintain your daily velocity.
-          </p>
+      {/* Compact Momentum Meter */}
+      <div className="glass-panel p-3 flex items-center justify-between gap-4 animate-fadeIn">
+        <div className="flex items-center gap-2 min-w-0">
+          <Sparkles className="w-4 h-4 text-violet-400 shrink-0" />
+          <span className="text-xs font-bold text-text-primary heading-outfit truncate">
+            Momentum: {momentum}%
+          </span>
         </div>
-        <div className="relative w-16 h-16 shrink-0">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-            <path
-              className="text-slate-900"
-              strokeWidth="3.5"
-              stroke="currentColor"
-              fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-            <path
-              className="text-violet-500 transition-all duration-1000"
-              strokeDasharray={`${momentum}, 100`}
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              stroke="currentColor"
-              fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center text-xs font-bold font-mono">
-            {momentum}%
-          </div>
+        <div className="flex-1 max-w-[140px] bg-slate-900 h-2 rounded-full overflow-hidden border border-white/5 shrink-0">
+          <div 
+            className="h-full rounded-full bg-gradient-to-r from-violet-500 to-pink-500 transition-all duration-1000"
+            style={{ width: `${momentum}%` }}
+          ></div>
         </div>
       </div>
 

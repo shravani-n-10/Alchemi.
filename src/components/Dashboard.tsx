@@ -150,24 +150,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ onCreateTask }) => {
             </p>
           </div>
 
-          <div className="flex items-center gap-6 shrink-0 bg-white/2 border border-white/5 p-4 rounded-xl">
-            <div className="text-center border-r border-white/10 pr-6">
-              <span className="text-[9px] text-text-muted uppercase font-bold block">Risk Level</span>
-              <span className={`text-sm font-black font-mono block mt-1 ${riskLevel === 'HIGH' ? 'text-red-400' : riskLevel === 'MEDIUM' ? 'text-amber-400' : 'text-green-400'}`}>
+          <div className="flex items-center gap-4 sm:gap-6 shrink-0 bg-white/2 border border-white/5 p-4 rounded-xl">
+            <div className="text-center border-r border-white/10 pr-4 sm:pr-6">
+              <span className="text-[9px] text-text-muted uppercase font-bold block mb-1.5">Risk Level</span>
+              <span 
+                className={`text-[10px] sm:text-xs font-black font-mono px-2 py-1 rounded-md border ${
+                  riskLevel === 'HIGH' 
+                    ? 'bg-red-950/40 border-red-500/25 text-red-400' 
+                    : riskLevel === 'MEDIUM' 
+                    ? 'bg-amber-950/40 border-amber-500/25 text-amber-400' 
+                    : 'bg-green-950/40 border-green-500/25 text-green-400'
+                }`}
+              >
                 {riskLevel}
               </span>
             </div>
             {highestTask && (
-              <div className="text-center border-r border-white/10 pr-6">
-                <span className="text-[9px] text-text-muted uppercase font-bold block">Highest Panic</span>
-                <span className="text-sm font-black font-mono block mt-1 text-pink-400">
+              <div className="text-center border-r border-white/10 pr-4 sm:pr-6">
+                <span className="text-[9px] text-text-muted uppercase font-bold block mb-1.5">Highest Panic</span>
+                <span className="text-[10px] sm:text-xs font-black font-mono px-2 py-1 rounded-md border bg-pink-950/40 border-pink-500/25 text-pink-400">
                   {highestTask.panicIndex}%
                 </span>
               </div>
             )}
             <div className="text-center">
-              <span className="text-[9px] text-text-muted uppercase font-bold block">Est. Completion</span>
-              <span className="text-sm font-black font-mono block mt-1 text-cyan-400">
+              <span className="text-[9px] text-text-muted uppercase font-bold block mb-1.5">Est. Completion</span>
+              <span className="text-[10px] sm:text-xs font-black font-mono px-2 py-1 rounded-md border bg-cyan-950/40 border-cyan-500/25 text-cyan-400">
                 {dailyPlan ? dailyPlan.timeline[dailyPlan.timeline.length - 1]?.timeSlot.split(' - ')[1] || '18:00' : '18:00'}
               </span>
             </div>

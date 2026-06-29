@@ -86,19 +86,35 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ onCreateTask }) => {
           <Zap className="w-3.5 h-3.5 text-yellow-400" /> State of Energy
         </span>
         <div className="grid grid-cols-3 gap-2">
-          {(['low', 'medium', 'high'] as const).map((level) => (
-            <button
-              key={level}
-              onClick={() => setEnergyLevel(level)}
-              className={`py-1.5 px-3 rounded-lg text-xs font-semibold capitalize border transition-all ${
-                energyLevel === level
-                  ? 'bg-violet-950/20 border-violet-500 text-white shadow-md shadow-violet-500/10'
-                  : 'bg-transparent border-slate-800/65 text-text-secondary hover:border-slate-700'
-              }`}
-            >
-              {level}
-            </button>
-          ))}
+          {(['low', 'medium', 'high'] as const).map((level) => {
+            const isActive = energyLevel === level;
+            
+            let activeClass = '';
+            let hoverClass = '';
+            
+            if (level === 'low') {
+              activeClass = 'bg-green-950/35 border-green-500 text-green-300 shadow-md shadow-green-500/10';
+              hoverClass = 'hover:border-green-500/55 hover:text-green-300';
+            } else if (level === 'medium') {
+              activeClass = 'bg-amber-950/35 border-amber-500 text-amber-300 shadow-md shadow-amber-500/10';
+              hoverClass = 'hover:border-amber-500/55 hover:text-amber-300';
+            } else {
+              activeClass = 'bg-violet-950/35 border-violet-500 text-violet-300 shadow-md shadow-violet-500/10';
+              hoverClass = 'hover:border-violet-500/55 hover:text-violet-300';
+            }
+
+            return (
+              <button
+                key={level}
+                onClick={() => setEnergyLevel(level)}
+                className={`py-1.5 px-3 rounded-lg text-xs font-semibold capitalize border transition-all ${
+                  isActive ? activeClass : `bg-transparent border-slate-805/65 text-text-secondary ${hoverClass}`
+                }`}
+              >
+                {level}
+              </button>
+            );
+          })}
         </div>
       </div>
 

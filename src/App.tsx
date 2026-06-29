@@ -190,11 +190,6 @@ const AppContent: React.FC = () => {
               </button>
             ) : (
               <div className="flex items-center gap-2.5 pl-3 border-l border-white/10 relative" ref={dropdownRef}>
-                <img
-                  src={userProfile.avatarUrl || 'https://i.pravatar.cc/150'}
-                  alt={userProfile.name}
-                  className="w-8 h-8 rounded-full border border-violet-500/20 object-cover shadow-inner"
-                />
                 <div className="hidden sm:block text-left">
                   <span className="text-xs font-bold block leading-none text-text-primary">{userProfile.name}</span>
                   <span className="text-[9px] text-text-muted mt-0.5 block leading-none">{userProfile.email}</span>
