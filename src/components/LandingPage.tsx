@@ -4,13 +4,26 @@ import { Sparkles, ShieldAlert, Calendar, Brain, Clock, HelpCircle, ChevronRight
 
 interface LandingPageProps {
   onEnter: () => void;
+  showModal?: boolean;
+  onCloseModal?: () => void;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, onCloseModal }) => {
   const { loginWithGoogle } = useTasks();
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [localShowModal, setLocalShowModal] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+
+  const isAuthModalOpen = showModal !== undefined ? showModal : localShowModal;
+
+  const closeAuthModal = () => {
+    if (onCloseModal) onCloseModal();
+    else setLocalShowModal(false);
+  };
+
+  const openAuthModal = () => {
+    setLocalShowModal(true);
+  };
 
   const handleDemoLogin = () => {
     loginWithGoogle('Alex Mercer', 'alex.mercer@gmail.com');
@@ -53,7 +66,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
         </nav>
 
         <button
-          onClick={() => setShowAuthModal(true)}
+          onClick={openAuthModal}
           className="glass-btn text-xs py-1.5 px-4 border border-violet-500/20 hover:border-violet-500/40 text-violet-300 flex items-center gap-1.5"
         >
           <LogIn className="w-3.5 h-3.5" /> Sign In with Google
@@ -78,7 +91,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
-              onClick={() => setShowAuthModal(true)}
+              onClick={openAuthModal}
               className="glass-btn glass-btn-primary py-3 px-8 text-sm flex items-center gap-2 shadow-lg w-full sm:w-auto justify-center"
             >
               Get Started Free <ChevronRight className="w-4 h-4" />
@@ -188,11 +201,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
       </footer>
 
       {/* Google Authentication Modal */}
-      {showAuthModal && (
+      {isAuthModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="glass-panel max-w-sm w-full p-6 relative text-center">
             <button
-              onClick={() => setShowAuthModal(false)}
+              onClick={closeAuthModal}
               className="absolute top-4 right-4 text-text-secondary hover:text-white transition-colors"
             >
               ✕
