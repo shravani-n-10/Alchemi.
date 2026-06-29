@@ -71,6 +71,7 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen flex flex-col relative z-10 text-text-primary">
       {/* Global Glassmorphic Navbar */}
       <header className="px-6 py-3.5 flex items-center justify-between border-b border-white/5 bg-white/5 backdrop-blur-md sticky top-0 z-40">
+        {/* Left Side: Brand Logo */}
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setCurrentPage(userProfile.isLoggedIn ? 'dashboard' : 'home')}>
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center shadow-lg shadow-violet-500/10">
             <Sparkles className="w-5 h-5 text-white" />
@@ -85,141 +86,142 @@ const AppContent: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-text-secondary">
-          {!userProfile.isLoggedIn ? (
-            <>
-              <button 
-                onClick={() => setCurrentPage('home')} 
-                className={`hover:text-white transition-colors py-1 ${currentPage === 'home' ? 'text-white border-b-2 border-violet-400' : ''}`}
-              >
-                Home
-              </button>
-              <button 
-                onClick={() => setCurrentPage('about')} 
-                className={`hover:text-white transition-colors py-1 ${currentPage === 'about' ? 'text-white border-b-2 border-violet-400' : ''}`}
-              >
-                About Us
-              </button>
-              <button 
-                onClick={() => setCurrentPage('guide')} 
-                className={`hover:text-white transition-colors py-1 ${currentPage === 'guide' ? 'text-white border-b-2 border-violet-400' : ''}`}
-              >
-                Guide / Info
-              </button>
-            </>
-          ) : (
-            <>
-              <button 
-                onClick={() => setCurrentPage('dashboard')} 
-                className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${currentPage === 'dashboard' ? 'text-white border-b-2 border-violet-400' : ''}`}
-              >
-                <LayoutDashboard className="w-3.5 h-3.5" /> Workspace
-              </button>
-              <button 
-                onClick={() => setCurrentPage('analytics')} 
-                className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${currentPage === 'analytics' ? 'text-white border-b-2 border-violet-400' : ''}`}
-              >
-                <BarChart2 className="w-3.5 h-3.5" /> Reflection
-              </button>
-              <button 
-                onClick={() => setCurrentPage('about')} 
-                className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${currentPage === 'about' ? 'text-white border-b-2 border-violet-400' : ''}`}
-              >
-                <Globe className="w-3.5 h-3.5" /> About
-              </button>
-              <button 
-                onClick={() => setCurrentPage('guide')} 
-                className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${currentPage === 'guide' ? 'text-white border-b-2 border-violet-400' : ''}`}
-              >
-                <HelpCircle className="w-3.5 h-3.5" /> Guide
-              </button>
-            </>
-          )}
-        </nav>
+        {/* Right Side: Navigation Links & Actions grouped together */}
+        <div className="flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-text-secondary">
+            {!userProfile.isLoggedIn ? (
+              <>
+                <button 
+                  onClick={() => setCurrentPage('home')} 
+                  className={`hover:text-white transition-colors py-1 ${currentPage === 'home' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                >
+                  Home
+                </button>
+                <button 
+                  onClick={() => setCurrentPage('about')} 
+                  className={`hover:text-white transition-colors py-1 ${currentPage === 'about' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                >
+                  About Us
+                </button>
+                <button 
+                  onClick={() => setCurrentPage('guide')} 
+                  className={`hover:text-white transition-colors py-1 ${currentPage === 'guide' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                >
+                  Guide / Info
+                </button>
+              </>
+            ) : (
+              <>
+                <button 
+                  onClick={() => setCurrentPage('dashboard')} 
+                  className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${currentPage === 'dashboard' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5" /> Workspace
+                </button>
+                <button 
+                  onClick={() => setCurrentPage('analytics')} 
+                  className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${currentPage === 'analytics' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                >
+                  <BarChart2 className="w-3.5 h-3.5" /> Reflection
+                </button>
+                <button 
+                  onClick={() => setCurrentPage('about')} 
+                  className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${currentPage === 'about' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                >
+                  <Globe className="w-3.5 h-3.5" /> About
+                </button>
+                <button 
+                  onClick={() => setCurrentPage('guide')} 
+                  className={`hover:text-white transition-colors py-1 flex items-center gap-1.5 ${currentPage === 'guide' ? 'text-white border-b-2 border-violet-400' : ''}`}
+                >
+                  <HelpCircle className="w-3.5 h-3.5" /> Guide
+                </button>
+              </>
+            )}
+          </nav>
 
-        {/* Actions / Profile Dropdown */}
-        <div className="flex items-center gap-4">
-          {isSpeaking && (
-            <button
-              onClick={stopSpeaking}
-              className="p-2 rounded-lg hover:bg-black/5 text-pink-500 flex items-center gap-1.5 text-xs font-semibold animate-pulse"
-              title="Stop AI Speech"
-            >
-              <VolumeX className="w-4 h-4" /> Speaking
-            </button>
-          )}
-
-          {!userProfile.isLoggedIn ? (
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="glass-btn text-xs py-1.5 px-4 border border-violet-500/20 hover:border-violet-500/40 text-violet-300 flex items-center gap-1.5"
-            >
-              <LogIn className="w-3.5 h-3.5" /> Sign In
-            </button>
-          ) : (
-            <div className="flex items-center gap-2.5 pl-3 border-l border-white/10 relative" ref={dropdownRef}>
-              <img
-                src={userProfile.avatarUrl || 'https://i.pravatar.cc/150'}
-                alt={userProfile.name}
-                className="w-8 h-8 rounded-full border border-violet-500/20 object-cover shadow-inner"
-              />
-              <div className="hidden sm:block text-left">
-                <span className="text-xs font-bold block leading-none text-text-primary">{userProfile.name}</span>
-                <span className="text-[9px] text-text-muted mt-0.5 block leading-none">{userProfile.email}</span>
-              </div>
-
+          <div className="flex items-center gap-4">
+            {isSpeaking && (
               <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="p-1.5 rounded-lg hover:bg-black/5 text-text-secondary hover:text-text-primary transition-all"
+                onClick={stopSpeaking}
+                className="p-2 rounded-lg hover:bg-black/5 text-pink-500 flex items-center gap-1.5 text-xs font-semibold animate-pulse"
+                title="Stop AI Speech"
               >
-                <MoreVertical className="w-4 h-4" />
+                <VolumeX className="w-4 h-4" /> Speaking
               </button>
+            )}
 
-              {/* Dropdown Menu */}
-              {showDropdown && (
-                <div className="absolute right-0 top-12 w-48 rounded-xl bg-slate-950/95 border border-white/10 shadow-2xl p-1.5 z-50 backdrop-blur-md animate-fadeIn">
-                  <button
-                    onClick={() => {
-                      setCurrentPage('about');
-                      setShowDropdown(false);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-all text-left"
-                  >
-                    <Globe className="w-3.5 h-3.5" /> About Us
-                  </button>
-                  <button
-                    onClick={() => {
-                      setCurrentPage('guide');
-                      setShowDropdown(false);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-all text-left"
-                  >
-                    <HelpCircle className="w-3.5 h-3.5" /> Guide / Info
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowSettings(true);
-                      setShowDropdown(false);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-all text-left"
-                  >
-                    <SettingsIcon className="w-3.5 h-3.5" /> Account Settings
-                  </button>
-                  <div className="h-px bg-white/5 my-1"></div>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setShowDropdown(false);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-950/20 rounded-lg transition-all text-left"
-                  >
-                    <LogOut className="w-3.5 h-3.5" /> Sign Out
-                  </button>
+            {!userProfile.isLoggedIn ? (
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="glass-btn text-xs py-1.5 px-4 border border-violet-500/20 hover:border-violet-500/40 text-violet-300 flex items-center gap-1.5"
+              >
+                <LogIn className="w-3.5 h-3.5" /> Sign In
+              </button>
+            ) : (
+              <div className="flex items-center gap-2.5 pl-3 border-l border-white/10 relative" ref={dropdownRef}>
+                <img
+                  src={userProfile.avatarUrl || 'https://i.pravatar.cc/150'}
+                  alt={userProfile.name}
+                  className="w-8 h-8 rounded-full border border-violet-500/20 object-cover shadow-inner"
+                />
+                <div className="hidden sm:block text-left">
+                  <span className="text-xs font-bold block leading-none text-text-primary">{userProfile.name}</span>
+                  <span className="text-[9px] text-text-muted mt-0.5 block leading-none">{userProfile.email}</span>
                 </div>
-              )}
-            </div>
-          )}
+
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="p-1.5 rounded-lg hover:bg-black/5 text-text-secondary hover:text-text-primary transition-all"
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+
+                {/* Dropdown Menu */}
+                {showDropdown && (
+                  <div className="absolute right-0 top-12 w-48 rounded-xl bg-slate-950/95 border border-white/10 shadow-2xl p-1.5 z-50 backdrop-blur-md animate-fadeIn">
+                    <button
+                      onClick={() => {
+                        setCurrentPage('about');
+                        setShowDropdown(false);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-all text-left"
+                    >
+                      <Globe className="w-3.5 h-3.5" /> About Us
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentPage('guide');
+                        setShowDropdown(false);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-all text-left"
+                    >
+                      <HelpCircle className="w-3.5 h-3.5" /> Guide / Info
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowSettings(true);
+                        setShowDropdown(false);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-all text-left"
+                    >
+                      <SettingsIcon className="w-3.5 h-3.5" /> Account Settings
+                    </button>
+                    <div className="h-px bg-white/5 my-1"></div>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setShowDropdown(false);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-950/20 rounded-lg transition-all text-left"
+                    >
+                      <LogOut className="w-3.5 h-3.5" /> Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

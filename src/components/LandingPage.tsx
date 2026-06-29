@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTasks } from '../context/TaskContext';
-import { Sparkles, ShieldAlert, Calendar, Brain, Clock, HelpCircle, ChevronRight, Laptop, LogIn } from 'lucide-react';
+import { Sparkles, ShieldAlert, Calendar, Brain, ChevronRight, LogIn } from 'lucide-react';
 
 interface LandingPageProps {
   onEnter: () => void;
@@ -38,40 +38,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, on
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-dark relative overflow-hidden text-text-primary">
+    <div className="min-h-[calc(100vh-70px)] flex flex-col justify-between relative overflow-hidden text-text-primary">
       {/* Background blobs */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-pink-500/5 rounded-full blur-[100px] pointer-events-none"></div>
-
-      {/* Header */}
-      <header className="px-6 py-4 flex items-center justify-between border-b border-white/5 bg-white/5 backdrop-blur-md relative z-30">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center shadow-lg shadow-violet-500/10">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-extrabold heading-outfit tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-text-primary to-violet-300">
-              ALCHEMI
-            </h1>
-            <span className="text-[9px] text-violet-400 font-bold uppercase tracking-widest block -mt-0.5">
-              AI Productivity OS
-            </span>
-          </div>
-        </div>
-
-        <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-text-secondary">
-          <a href="#features" className="hover:text-white transition-colors">Features</a>
-          <a href="#workflow" className="hover:text-white transition-colors">Workflow</a>
-          <a href="#about" className="hover:text-white transition-colors">About</a>
-        </nav>
-
-        <button
-          onClick={openAuthModal}
-          className="glass-btn text-xs py-1.5 px-4 border border-violet-500/20 hover:border-violet-500/40 text-violet-300 flex items-center gap-1.5"
-        >
-          <LogIn className="w-3.5 h-3.5" /> Sign In with Google
-        </button>
-      </header>
 
       {/* Hero Section */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative z-20">
@@ -86,7 +56,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, on
           </h2>
 
           <p className="text-sm md:text-base text-text-secondary max-w-2xl mx-auto leading-relaxed">
-            Alchemi is a proactive, multi-agent AI companion. It calculates your **Panic Index**, automatically structures a micro-scheduled timeline, and generates starter assets to help you take immediate action.
+            Alchemi helps you beat procrastination by converting passive reminders into active, AI-scheduled task execution. It calculates your urgency using a dynamic **Panic Index**, breaks down complex goals, and auto-generates **AI Starter Drafts** so you can start working instantly.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -152,7 +122,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, on
       {/* Features Section */}
       <section id="features" className="px-6 py-16 max-w-6xl mx-auto w-full relative z-20 border-t border-white/5">
         <div className="text-center space-y-2 mb-12">
-          <h3 className="text-2xl font-bold heading-outfit">The Multi-Agent AI System</h3>
+          <h3 className="text-2xl font-bold heading-outfit">How Alchemi Helps You Execute</h3>
           <p className="text-xs text-text-secondary max-w-md mx-auto">
             Three core autonomous agents coordinate in the background to streamline your execution.
           </p>
@@ -164,9 +134,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, on
             <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
               <ShieldAlert className="w-5 h-5" />
             </div>
-            <h4 className="text-base font-bold heading-outfit">1. Prioritizer Agent</h4>
+            <h4 className="text-base font-bold heading-outfit">1. Beat Procrastination</h4>
             <p className="text-xs text-text-secondary leading-relaxed">
-              Calculates the **Panic Index** dynamically. Adapts to your energy level and deadlines, highlighting "Silent Killers" that need immediate attention.
+              Calculates your **Panic Index** dynamically. Adapts to your energy level and deadlines, highlighting "Silent Killers" that need immediate attention.
             </p>
           </div>
           {/* Card 2 */}
@@ -174,7 +144,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, on
             <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400">
               <Calendar className="w-5 h-5" />
             </div>
-            <h4 className="text-base font-bold heading-outfit">2. Planner Agent</h4>
+            <h4 className="text-base font-bold heading-outfit">2. Auto-Schedule Your Day</h4>
             <p className="text-xs text-text-secondary leading-relaxed">
               Deconstructs your goals into milestones and **auto-schedules** them. Protects your calendar commitments, meetings, meals, and breaks automatically.
             </p>
@@ -184,9 +154,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, showModal, on
             <div className="w-10 h-10 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-400">
               <Brain className="w-5 h-5" />
             </div>
-            <h4 className="text-base font-bold heading-outfit">3. Risk & Recovery Agent</h4>
+            <h4 className="text-base font-bold heading-outfit">3. Create Starter Drafts</h4>
             <p className="text-xs text-text-secondary leading-relaxed">
-              Monitors progress in the background. If a deadline is at risk, it intervenes immediately with actionable options to de-scope or reschedule.
+              When a task is added, the AI generates a step-by-step checklist and **Starter Assets** (pre-written email drafts, code boilerplates, outlines) so you can take action instantly.
             </p>
           </div>
         </div>
